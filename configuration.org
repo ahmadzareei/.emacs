@@ -1,0 +1,64 @@
+#+TITLE: Emacs configuration
+
+
+* Using [[https://github.com/technomancy/better-defaults][Better Defaults]] for the basic settings
+
+#+BEGIN_SRC emacs-lisp
+(load-file "~/.emacs.d/sources/better-defaults.el")
+(require 'better-defaults)
+#+END_SRC
+
+* Setting Personal Information
+
+#+BEGIN_SRC emacs-lisp
+
+  (setq user-full-name "Ahmad Mathiew Zareei"
+        user-mail-address "zareei@berkeley.edu"
+        calendar-latitude 49.28
+        calendar-longitude -123.12
+        calendar-location-name "Vancouver, BC")
+#+END_SRC
+  
+    
+* Add =resources= to =load-path=
+  
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path "~/.emacs.d/sources/")
+#+END_SRC
+
+#+BEGIN_SRC emacs-lisp
+   (require 'cask "~/.cask/cask.el")
+   (cask-initialize) 
+   (require 'pallet)
+   (pallet-mode t)
+#+END_SRC
+  
+* UI preferences
+** Disabling Menu and Scroll bar
+ #+BEGIN_SRC emacs-lisp
+  (tool-bar-mode 0)
+  (menu-bar-mode 0)
+  (when window-system
+    (scroll-bar-mode -1))
+ #+END_SRC
+   
+** Theme to use
+#+BEGIN_SRC emacs-lisp
+(when window-system
+  (setq solarized-use-variable-pitch nil)
+  (setq solarized-height-plus-1 1.0)
+  (setq solarized-height-plus-2 1.0)
+  (setq solarized-height-plus-3 1.0)
+  (setq solarized-height-plus-4 1.0)
+  (setq solarized-high-contrast-mode-line t)
+  (load-theme 'solarized-dark t))
+#+END_SRC
+** Highlighting the current line
+#+BEGIN_SRC emacs-lisp
+(when window-system
+  (global-hl-line-mode))
+#+END_SRC
+* Adding latex Mode
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
+#+END_SRC

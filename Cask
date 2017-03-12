@@ -1,0 +1,10 @@
+(source gnu)
+(source melpa)
+
+(depends-on "auctex")
+(depends-on "cdlatex")
+(depends-on "flyspell-correct")
+(depends-on "latex-pretty-symbols")
+(depends-on "latex-preview-pane")
+(depends-on "pallet")
+(depends-on "try")
