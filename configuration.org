@@ -62,3 +62,11 @@
 #+BEGIN_SRC emacs-lisp
   (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
 #+END_SRC
+
+* Programming mode
+** Highlighting uncomiited Changes
+#+BEGIN_SRC emacs-lisp
+(require 'diff-hl)
+(add-hook 'prog-mode-hook 'turn-on-diff-hl-mode)
+(add-hook 'vc-dir-mode-hook 'turn-on-diff-hl-mode)
+#+END_SRC
