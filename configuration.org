@@ -71,6 +71,7 @@
 (add-hook 'vc-dir-mode-hook 'turn-on-diff-hl-mode)
 #+END_SRC
 
+
 * Org-mode
 ** Showing images in org mode
 #+BEGIN_SRC emacs-lisp
@@ -92,4 +93,7 @@
 ;; (require 'org-bullets)
 (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 #+END_SRC
+
+   
+
 
