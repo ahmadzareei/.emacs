@@ -70,3 +70,26 @@
 (add-hook 'prog-mode-hook 'turn-on-diff-hl-mode)
 (add-hook 'vc-dir-mode-hook 'turn-on-diff-hl-mode)
 #+END_SRC
+
+* Org-mode
+** Showing images in org mode
+#+BEGIN_SRC emacs-lisp
+(add-to-list 'iimage-mode-image-regex-alist
+             (cons (concat "\\[\\[file:\\(~?" iimage-mode-image-filename-regex
+                           "\\)\\]")  1))
+
+(defun org-toggle-iimage-in-org ()
+  "display images in your org file"
+  (interactive)
+  (if (face-underline-p 'org-link)
+      (set-face-underline-p 'org-link nil)
+      (set-face-underline-p 'org-link t))
+  (iimage-mode ‘toggle))
+#+END_SRC
+
+** Adding org-bullets for the org-mode
+#+BEGIN_SRC emacs-lisp
+;; (require 'org-bullets)
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+#+END_SRC
+
