@@ -19,7 +19,6 @@
         calendar-location-name "Vancouver, BC")
 #+END_SRC
   
-    
 * Add =resources= to =load-path=
   
 #+BEGIN_SRC emacs-lisp
@@ -42,17 +41,6 @@
     (scroll-bar-mode -1))
  #+END_SRC
    
-** Theme to use
-#+BEGIN_SRC emacs-lisp
-(when window-system
-  (setq solarized-use-variable-pitch nil)
-  (setq solarized-height-plus-1 1.0)
-  (setq solarized-height-plus-2 1.0)
-  (setq solarized-height-plus-3 1.0)
-  (setq solarized-height-plus-4 1.0)
-  (setq solarized-high-contrast-mode-line t)
-  (load-theme 'solarized-dark t))
-#+END_SRC
 ** Highlighting the current line
 #+BEGIN_SRC emacs-lisp
 (when window-system
@@ -64,6 +52,7 @@
 #+END_SRC
 
 * Programming mode
+  
 ** Highlighting uncomiited Changes
 #+BEGIN_SRC emacs-lisp
 (require 'diff-hl)
@@ -71,29 +60,91 @@
 (add-hook 'vc-dir-mode-hook 'turn-on-diff-hl-mode)
 #+END_SRC
 
+** Terminal 
+   I like to use multi term for terminal and it is binded with the key C-c s
+#+BEGIN_SRC emacs-lisp
+(global-set-key (kbd "C-c s") 'multi-term)
+#+END_SRC
+** dired
+#+BEGIN_SRC emacs-lisp
+(require 'dired+)
+(require 'dired-open)
+#+END_SRC
+
+Open media files accordingly
+#+BEGIN_SRC emacs-lisp
+(setq dired-open-extensions
+      '(("pdf" . "evince")
+        ("mkv" . "vlc")
+        ("mp4" . "vlc")
+        ("avi" . "vlc")
+        ("mp3" . "vlc")))
+#+END_SRC
+Using a good view for dired directory
+- =l= for listing
+- =h= for human readable size
+- =A= for not including "." and ".."
+#+BEGIN_SRC emacs-lisp
+(setq-default dired-listing-switches "-lhA")
+#+END_SRC
+Kill buffers of deleted files
+#+BEGIN_SRC emacs-lisp
+(setq dired-clean-up-buffers-too t)
+#+END_SRC
+copying directories recursively, without asking
+deleting directories with permission
+#+BEGIN_SRC emacs-lisp
+(setq dired-recursive-copies 'always)
+(setq dired-recursive-deletes 'top)
+#+END_SRC
 
 * Org-mode
 ** Showing images in org mode
+This will show the inline image using =C-c C-x C-v=
 #+BEGIN_SRC emacs-lisp
-(add-to-list 'iimage-mode-image-regex-alist
-             (cons (concat "\\[\\[file:\\(~?" iimage-mode-image-filename-regex
-                           "\\)\\]")  1))
-
-(defun org-toggle-iimage-in-org ()
-  "display images in your org file"
+(defun do-org-show-all-inline-images ()
   (interactive)
-  (if (face-underline-p 'org-link)
-      (set-face-underline-p 'org-link nil)
-      (set-face-underline-p 'org-link t))
-  (iimage-mode ‘toggle))
-#+END_SRC
+  (org-display-inline-images t t))
+(global-set-key (kbd "C-c C-x C-v")
+                'do-org-show-all-inline-images)
+#+END_SRC 
 
 ** Adding org-bullets for the org-mode
 #+BEGIN_SRC emacs-lisp
-;; (require 'org-bullets)
+(require 'org-bullets)
 (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 #+END_SRC
+   
+* Editting
+  
+** Configuring Yasnippet
+I store my snippets in here
+#+BEGIN_SRC emacs-lisp
+(setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+(yas-global-mode 1)
+#+END_SRC
+Note letting to indent automatically
+#+BEGIN_SRC emacs-lisp
+(setq yas/indent-line nil)
+#+END_SRC
+
+
+
 
    
+* Email Setups
 
-
+** Adding BBDB
+#+BEGIN_SRC emacs-lisp
+(require 'bbdb)
+#+END_SRC
+** Active integration with gnus
+#+BEGIN_SRC emacs-lisp
+(bbdb-initialize 'gnus 'message)
+(bbdb-insinuate-message)
+(add-hook 'gnus-startup-hook 'bbdb-insinuate-gnus)
+#+END_SRC
+** Also Saving my contacts to the dropbox
+#+BEGIN_SRC emacs-lisp
+(setq bbdb-file "~/Dropbox/bbdb/contacts")
+#+END_SRC
