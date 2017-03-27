@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: writemath
+# key: wm
+# --
+
+\#+OPTIONS: tex:dvipng

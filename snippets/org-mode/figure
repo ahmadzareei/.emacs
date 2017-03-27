@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: Inserting figure
+# key: figure
+# --
+
+#+CAPTION: $1
+#+NAME: $2
+#+ATTR_HTML: width="600px"
+#+ATTR_ORG: :width 600
+$0

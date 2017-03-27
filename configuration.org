@@ -1,13 +1,13 @@
 #+TITLE: Emacs configuration
 
-* Using [[https://github.com/technomancy/better-defaults][Better Defaults]] for the basic settings
+* [[https://github.com/technomancy/better-defaults][Better Defaults]]
 
 #+BEGIN_SRC emacs-lisp
 (load-file "~/.emacs.d/sources/better-defaults.el")
 (require 'better-defaults)
 #+END_SRC
 
-* Setting Personal Information
+* Personal Information
 
 #+BEGIN_SRC emacs-lisp
 
@@ -45,8 +45,18 @@
 (when window-system
   (global-hl-line-mode))
 #+END_SRC
-* Adding latex Mode
-**  Turning on Cd-latex for typping math
+** Theme
+#+BEGIN_SRC emacs-lisp
+  (load-theme 'zenburn t)
+#+END_SRC
+** Font size
+#+BEGIN_SRC emacs-lisp
+ (global-set-key (kbd "C-+") 'text-scale-increase)
+ (global-set-key (kbd "C-_") 'text-scale-decrease)
+#+END_SRC
+
+* Latex Mode
+** Turning on Cd-latex for typping math
 #+BEGIN_SRC emacs-lisp
   (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
 #+END_SRC
@@ -54,6 +64,11 @@
 #+BEGIN_SRC emacs-lisp
 (add-hook 'LaTeX-mode-hook #'latex-extra-mode)
 #+END_SRC 
+unfortunately this mode disables c-c c-f mode for font selection
+so we turn it off in latex-extra to bind c-c c-f to font selection
+#+BEGIN_SRC emacs-lisp
+(custom-set-variables '(latex/override-font-map nil))
+#+END_SRC
 ** Adding latex-preview-pane-mode to view file instead of openning evice
 #+BEGIN_SRC emacs-lisp
 (eval-after-load "tex"
@@ -85,14 +100,24 @@
 (add-hook 'LaTeX-mode-hook
           (lambda () (local-set-key (kbd "<f6>") #'preview-buffer)))
 (add-hook 'LaTeX-mode-hook
-          (lambda () (local-set-key (kbd "<f7>") #'latex-preview-pane-mode)))
+          (lambda () (local-set-key (kbd "<f5>") #'preview-environment)))
 
+(add-hook 'LaTeX-mode-hook
+          (lambda () (local-set-key (kbd "<f7>") #'latex-preview-pane-mode)))
+(add-hook 'LaTeX-mode-hook
+          (lambda () (local-set-key (kbd "M-p") #'ace-window)))
 #+END_SRC
 ** Adding a default biblography for ref-tex and enabling it all the time in auctex
 #+BEGIN_SRC emacs-lisp
 (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
 (setq reftex-plug-into-AUCTeX t)
 (setq reftex-default-bibliography '("~/Dropbox/Research/Bibtex/library/library.bib")) 
+#+END_SRC
+** Adding latex-image to see pictures of formula in orgmode
+#+BEGIN_SRC emacs-lisp
+(setq org-latex-create-formula-image-program 'imagemagick)
+;; For changing the width of the image
+(setq org-image-actual-width nil)
 #+END_SRC
 * Programming mode
 ** Highlighting uncomiited Changes
@@ -145,19 +170,42 @@ deleting directories with permission
 (require 'tramp-term)
 #+END_SRC
 * Buffers and files
-** Enabling ido-mode
+
+** Remember recent files
 #+BEGIN_SRC emacs-lisp
-; Use IDO for both buffer and file completion and ido-everywhere to t
-(setq org-completion-use-ido t)
-(setq ido-everywhere t)
-(setq ido-max-directory-size 100000)
-(ido-mode (quote both))
-; Use the current window when visiting files and buffers with ido
-(setq ido-default-file-method 'selected-window)
-(setq ido-default-buffer-method 'selected-window)
-; Use the current window for indirect buffer display
-(setq org-indirect-buffer-display 'current-window)
+;; save recent files
+(require 'recentf)
+(recentf-mode t)
+(setq recentf-save-file (concat user-emacs-directory "recentf")
+      recentf-max-saved-items 200
+      recentf-max-menu-items 15)
+(global-set-key (kbd "C-x C-g") 'recentf-open-files)
 #+END_SRC
+
+** Swiper mode
+#+BEGIN_SRC emacs-lisp
+(ivy-mode 1)
+(setq ivy-use-virtual-buffers t)
+(setq enable-recursive-minibuffers t)
+(global-set-key "\C-s" 'swiper)
+(global-set-key (kbd "C-c C-r") 'ivy-resume)
+(global-set-key (kbd "<f6>") 'ivy-resume)
+(global-set-key (kbd "M-x") 'counsel-M-x)
+(global-set-key (kbd "C-x C-f") 'counsel-find-file)
+(global-set-key (kbd "<f1> f") 'counsel-describe-function)
+(global-set-key (kbd "<f1> v") 'counsel-describe-variable)
+(global-set-key (kbd "<f1> l") 'counsel-fi1nd-library)
+(global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
+(global-set-key (kbd "<f2> u") 'counsel-unicode-char)
+(global-set-key (kbd "C-c g") 'counsel-git)
+(global-set-key (kbd "C-c j") 'counsel-git-grep)
+(global-set-key (kbd "C-c k") 'counsel-ag)
+(global-set-key (kbd "C-x l") 'counsel-locate)
+;; (global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
+(define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
+(setq ivy-use-virtual-buffers t)
+#+END_SRC
+
 ** Writing backups somehwere else
 #+BEGIN_SRC emacs-lisp
 ;; store all autosave files in the tmp dir
@@ -180,24 +228,6 @@ deleting directories with permission
 (setq uniquify-after-kill-buffer-p t)    ; rename after killing uniquified
 (setq uniquify-ignore-buffers-re "^\\*") ; don't muck with special buffers
 #+END_SRC
-** Remember recent files
-#+BEGIN_SRC emacs-lisp
-;; save recent files
-(require 'recentf)
-(recentf-mode t)
-(setq recentf-save-file (concat user-emacs-directory "recentf")
-      recentf-max-saved-items 200
-      recentf-max-menu-items 15)
-#+END_SRC
-** Use ido selection for the recent files
-#+BEGIN_SRC emacs-lisp
-(defun ido-choose-from-recentf ()
-  "Use ido to select a recently visited file from the `recentf-list'"
-  (interactive)
-  (find-file (ido-completing-read "Open file: " recentf-list nil t)))
-  ;;; bind it to "C-x C-g"
-(global-set-key (kbd "C-x C-g") 'ido-choose-from-recentf)
-#+END_SRC
 ** Mode line defaults
 #+BEGIN_SRC emacs-lisp
 (line-number-mode t)
@@ -205,7 +235,58 @@ deleting directories with permission
 (size-indication-mode nil)
 #+END_SRC
 ** Theme
-   
+** Adding ace-jump mode and bind it to c-x o
+#+BEGIN_SRC emacs-lisp
+(global-set-key (kbd "M-p") 'ace-window)
+#+END_SRC
+** scrolling the other window key binding 
+Scrolling up and down the other window
+#+BEGIN_SRC emacs-lisp
+(global-set-key (kbd "C-V") 'scroll-other-window-down)
+(global-set-key (kbd "M-V") 'scroll-other-window-up)
+#+END_SRC
+** Resizing the windows
+#+BEGIN_SRC emacs-lisp
+    (global-set-key (kbd "C-<") 'shrink-window-horizontally)
+    (global-set-key (kbd "C->") 'enlarge-window-horizontally)
+    (global-set-key (kbd "C-{") 'shrink-window)
+    (global-set-key (kbd "C-}") 'enlarge-window)
+#+END_SRC
+** Expand Region - Smart
+#+BEGIN_SRC emacs-lisp
+ (require 'expand-region)
+(global-set-key (kbd "C-=") 'er/expand-region)
+#+END_SRC
+
+** Open files in Desktop
+I want to open the corresponding foler hitting f4 key
+#+BEGIN_SRC emacs-lisp
+(defun xah-open-in-desktop ()
+  "Show current file in desktop (OS's file manager).
+URL `http://ergoemacs.org/emacs/emacs_dired_open_file_in_ext_apps.html'
+Version 2015-11-30"
+  (interactive)
+  (cond
+   ((string-equal system-type "windows-nt")
+    (w32-shell-execute "explore" (replace-regexp-in-string "/" "\\" default-directory t t)))
+   ((string-equal system-type "darwin") (shell-command "open ."))
+   ((string-equal system-type "gnu/linux")
+    (let (
+          (process-connection-type nil)
+          (openFileProgram (if (file-exists-p "/usr/bin/xdg-open")
+                               "/usr/bin/gvfs-open"
+                             "/usr/bin/gvfs-open")))
+      (start-process "" nil openFileProgram "."))
+    ;; (shell-command "xdg-open .") ;; 2013-02-10 this sometimes froze emacs till the folder is closed. For example: with nautilus
+    )))
+(global-set-key (kbd "<f4>") 'xah-open-in-desktop) 
+
+#+END_SRC
+* Flycheck & flyspell
+#+BEGIN_SRC emacs-lisp
+(setq global-flycheck-mode t)
+(global-set-key (kbd "<f8>") 'flyspell-buffer)
+#+END_SRC
 * Org-mode
 ** Todo keywords
 #+BEGIN_SRC emacs-lisp
@@ -290,6 +371,28 @@ This will show the inline image using =C-c C-x C-v=
 ;;               "* NEXT Respond to %? subject %? \n SCHEDULED: %t\n%U\n%a\n" )
 
 #+END_SRC
+** Refiling configuration
+#+BEGIN_SRC emacs-lisp
+; Targets include this file and any file contributing to the agenda - up to 9 levels deep
+(setq org-refile-targets (quote ((nil :maxlevel . 9)
+                                 (org-agenda-files :maxlevel . 9))))
+
+; Use full outline paths for refile targets 
+(setq org-refile-use-outline-path t)
+
+; Targets complete directly
+(setq org-outline-path-complete-in-steps nil)
+
+; Allow refile to create parent tasks with confirmation
+(setq org-refile-allow-creating-parent-nodes (quote confirm))
+;;;; Refile settings
+; Exclude DONE state tasks from refile targets
+(defun az/verify-refile-target ()
+  "Exclude todo keywords with a done state from refile targets"
+  (not (member (nth 2 (org-heading-components)) org-done-keywords)))
+
+(setq org-refile-target-verify-function 'az/verify-refile-target)
+#+END_SRC
 ** Defining customized keys for some stuff
 #+BEGIN_SRC emacs-lisp
 (global-set-key (kbd "<f12>") 'org-agenda)
@@ -318,28 +421,6 @@ This will show the inline image using =C-c C-x C-v=
               ("NEXT" ("WAITING") ("CANCELLED") ("HOLD"))
               ("DONE" ("WAITING") ("CANCELLED") ("HOLD")))))
 #+END_SRC
-** Refiling configuration
-#+BEGIN_SRC emacs-lisp
-; Targets include this file and any file contributing to the agenda - up to 9 levels deep
-(setq org-refile-targets (quote ((nil :maxlevel . 9)
-                                 (org-agenda-files :maxlevel . 9))))
-
-; Use full outline paths for refile targets - we file directly with IDO
-(setq org-refile-use-outline-path t)
-
-; Targets complete directly with IDO
-(setq org-outline-path-complete-in-steps nil)
-
-; Allow refile to create parent tasks with confirmation
-(setq org-refile-allow-creating-parent-nodes (quote confirm))
-;;;; Refile settings
-; Exclude DONE state tasks from refile targets
-(defun az/verify-refile-target ()
-  "Exclude todo keywords with a done state from refile targets"
-  (not (member (nth 2 (org-heading-components)) org-done-keywords)))
-
-(setq org-refile-target-verify-function 'az/verify-refile-target)
-#+END_SRC
 ** Org indentation mode
 #+BEGIN_SRC emacs-lisp
   (setq org-indent-mode 1)
@@ -350,13 +431,20 @@ This will show the inline image using =C-c C-x C-v=
 #+BEGIN_SRC emacs-lisp
   (setq org-agenda-custom-commands
         '(("F" "Full List"
-         ((agenda)
-          (tags-todo "TASK")
-          (tags-todo "PAPER")
-          (tags-todo "SEMINAR")
-          (tags-todo "PROJECTS")
-          (tags-todo "READ")))
-          ))
+            (
+               (todo "NEXT")
+               (tags-todo "TASK")
+               (tags-todo "PAPER")
+               (tags-todo "SEMINAR")
+               (tags-todo "PROJECTS")
+               (tags-todo "READ")))
+          ("t" "NEXT & TODO" ((todo "NEXT") (todo "TODO")))
+          ("j" "Journal paper" tags-todo "PAPER")
+          ("e" "SEMINAR" tags-todo "SEMINAR")
+          ("c" "CALL" todo "PHONE")
+          ("r" "READ" tags-todo "READ")
+          )
+   )
 #+END_SRC
 
 ** Setting the Diary 
@@ -375,8 +463,11 @@ This will show the inline image using =C-c C-x C-v=
 (add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
 #+END_SRC
 
-* Editting
+* Weblog editing
+** Adding jekyll-mode 
+I have a Yasnipet for template and then export the body
 
+* Yasnipet
 ** Configuring Yasnippet
 I store my snippets in here
 #+BEGIN_SRC emacs-lisp
@@ -404,27 +495,15 @@ and then telling org-mode to use this function
                       (define-key yas/keymap [tab] 'yas/next-field)))
 
 #+END_SRC
-** Resizing the windows
-#+BEGIN_SRC emacs-lisp
-    (global-set-key (kbd "C-<") 'shrink-window-horizontally)
-    (global-set-key (kbd "C->") 'enlarge-window-horizontally)
-    (global-set-key (kbd "C-{") 'shrink-window)
-    (global-set-key (kbd "C-}") 'enlarge-window)
-#+END_SRC
+
 * Email Setup  
-** global key for mu4e
+** Global keys for mu4e
 #+BEGIN_SRC emacs-lisp
 (global-set-key (kbd "<f10>") 'mu4e) 
 #+END_SRC
-** Adding BBDB
+** BBDB
 #+BEGIN_SRC emacs-lisp
 (require 'bbdb)
-#+END_SRC
-** Active integration with gnus
-#+BEGIN_SRC emacs-lisp
-(bbdb-initialize 'gnus 'message)
-(bbdb-insinuate-message)
-(add-hook 'gnus-startup-hook 'bbdb-insinuate-gnus)
 #+END_SRC
 ** Also Saving my contacts to the dropbox
 #+BEGIN_SRC emacs-lisp
@@ -454,7 +533,7 @@ and I am using offlineimap for syncing emails
 #+BEGIN_SRC emacs-lisp
 (setq
   mu4e-get-mail-command "offlineimap"   ;; or fetchmail, or ...
-  mu4e-update-interval 600)             ;; update every 10 minutes
+  mu4e-update-interval 300)             ;; update every 5 minutes
 #+END_SRC
 *** Speeding up indexing emails
 See manpage for =mu-update-index= 
@@ -599,33 +678,26 @@ Everyonce in a while I do complete indexing
 #+BEGIN_SRC emacs-lisp
 (with-eval-after-load 'mu4e-alert
   ;; Enable Desktop notifications
-  (mu4e-alert-set-default-style 'notifications)) 
-  ;; (mu4e-alert-set-default-style 'libnotify))  ; Alternative for linux
+  (mu4e-alert-set-default-style 'notifications) 
+  (mu4e-alert-set-default-style 'libnotify))  ; Alternative for linux
+;; (setq mu4e-alert-interesting-mail-query
+;;      (concat
+;;       "maildir:/gmail/INBOX OR maildir:/bmail/INBOX" " flag:unread AND NOT flag:trashed"))
+
 #+END_SRC
 *** Org-mode-links for copying to my todo list
 #+BEGIN_SRC emacs-lisp
   (define-key mu4e-headers-mode-map (kbd "C-c p") 'org-store-link)
   (define-key mu4e-view-mode-map    (kbd "C-c p") 'org-store-link)
 #+END_SRC
-* Some Extra Features
+
+* Fun! (weather forecast, google maps!)
 ** Adding weather forecast
 #+BEGIN_SRC emacs-lisp
 (require 'forecast)
  (setq forecast-api-key "f4482c0687a9ce39f7a22f34a83056f6")
 #+END_SRC   
 
-
-
-
-* Expand Region - Smart
-#+BEGIN_SRC emacs-lisp
- (require 'expand-region)
-(global-set-key (kbd "C-=") 'er/expand-region)
-#+END_SRC
-
-
-
-* Some google features
 ** Google-maps - It's so cool- [[https://julien.danjou.info/projects/emacs-packages#google-maps][check here ]]
 #+BEGIN_SRC emacs-lisp
 (require 'google-maps)
@@ -635,6 +707,9 @@ Everyonce in a while I do complete indexing
 (global-set-key (kbd "C-x g") 'google-this-mode-submap)
 #+END_SRC
 
+
+
+
 * Explaining some modified key-modes I have
 - f12 -> org-agenda
 - f9 -> for checking emails with mu4e
@@ -642,6 +717,7 @@ Everyonce in a while I do complete indexing
 - f9 b -> bbdb mode
 - f9 c -> calendar
 - f9 w -> weather forecast
+- f4 -> open the corresponding foler outside
 - C-c c -> capture with emacs
 - C-c s -> for multi-term
 - C-x C-g -> choosing from recentf in ido-mode
@@ -652,3 +728,4 @@ Everyonce in a while I do complete indexing
 - c-} -> expand window vertically
 - C-= -> expand region mode
 - C-c p -> in mu4e store the links for next usage in some org-file pasting with C-c l
+  

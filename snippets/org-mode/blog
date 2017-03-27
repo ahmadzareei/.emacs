@@ -1,0 +1,13 @@
+# -*- mode: snippet -*-
+# name: New Post for blog
+# key: blog
+# --
+
+#+begin_html
+---
+layout: posts-article
+title: $1
+category: ${2:linux/blog}
+---
+#+end_html
+$0
