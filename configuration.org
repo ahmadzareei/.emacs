@@ -19,7 +19,6 @@
 #+END_SRC
 
 * Add =resources= to =load-path=
-  
 #+BEGIN_SRC emacs-lisp
   (add-to-list 'load-path "~/.emacs.d/sources/")
 #+END_SRC
@@ -32,7 +31,8 @@
 #+END_SRC
   
 * UI preferences
-** Disabling Menu and Scroll bar
+** Menu and Scroll bar
+Disabling Menu and Scroll bar
  #+BEGIN_SRC emacs-lisp
   (tool-bar-mode 0)
   (menu-bar-mode 0)
@@ -40,7 +40,8 @@
     (scroll-bar-mode -1))
  #+END_SRC
    
-** Highlighting the current line
+** Highlight
+Hilight the current line
 #+BEGIN_SRC emacs-lisp
 (when window-system
   (global-hl-line-mode))
@@ -80,20 +81,25 @@
 (switch-to-buffer "*Bookmark List*")
 #+END_SRC
 * Latex Mode
-** Turning on Cd-latex for typping math
+** Cd-LaTeX 
+I turn on Cd-LaTeX for latex
+For a full list of stuff available see C-c ?
 #+BEGIN_SRC emacs-lisp
   (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
 #+END_SRC
-** Adding latex extra mode, =C-c C-a= will compile fully and handle errors
+** LaTeX extra mode
+=C-c C-a= will compile everything and is awesome 
 #+BEGIN_SRC emacs-lisp
 (add-hook 'LaTeX-mode-hook #'latex-extra-mode)
 #+END_SRC 
-unfortunately this mode disables c-c c-f mode for font selection
-so we turn it off in latex-extra to bind c-c c-f to font selection
+unfortunately this LaTeX extra mode disables =C-c C-f= mode for font
+selection so we turn it off in latex-extra to bind =-c C-f= to font
+selection
 #+BEGIN_SRC emacs-lisp
 (custom-set-variables '(latex/override-font-map nil))
 #+END_SRC
-** Adding latex-preview-pane-mode to view file instead of openning evice
+** LaTex-preview-pane-mode 
+Adding latex-preview-pane-mode to view compiled files instead of openning evice
 #+BEGIN_SRC emacs-lisp
 (eval-after-load "tex"
   '(add-to-list
@@ -118,7 +124,7 @@ so we turn it off in latex-extra to bind c-c c-f to font selection
      (output-pdf "preview-pane-mode")
      (output-html "xdg-open")))))
 #+END_SRC
-** some key bindings for latex mode
+** key-bindings
    + I love to use preview-buffer, and I use f6 to activate this mode, instead of C-c p C-b
 #+BEGIN_SRC emacs-lisp
 (add-hook 'LaTeX-mode-hook
@@ -131,17 +137,13 @@ so we turn it off in latex-extra to bind c-c c-f to font selection
 (add-hook 'LaTeX-mode-hook
           (lambda () (local-set-key (kbd "M-p") #'ace-window)))
 #+END_SRC
-** Adding a default biblography for ref-tex and enabling it all the time in auctex
+** Biblography
+Adding a default biblography for ref-tex and enabling it all the time
+in auctex
 #+BEGIN_SRC emacs-lisp
 (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
 (setq reftex-plug-into-AUCTeX t)
 (setq reftex-default-bibliography '("~/Dropbox/Research/Bibtex/library/library.bib")) 
-#+END_SRC
-** Adding latex-image to see pictures of formula in orgmode
-#+BEGIN_SRC emacs-lisp
-(setq org-latex-create-formula-image-program 'imagemagick)
-;; For changing the width of the image
-(setq org-image-actual-width nil)
 #+END_SRC
 * Programming mode
 ** Highlighting uncomiited Changes
@@ -194,8 +196,7 @@ deleting directories with permission
 (require 'tramp-term)
 #+END_SRC
 * Buffers and files
-
-** Remember recent files
+** recent files
 #+BEGIN_SRC emacs-lisp
 ;; save recent files
 (require 'recentf)
@@ -230,7 +231,8 @@ deleting directories with permission
 (setq ivy-use-virtual-buffers t)
 #+END_SRC
 
-** Writing backups somehwere else
+** backups
+Writing backups somewhere else
 #+BEGIN_SRC emacs-lisp
 ;; store all autosave files in the tmp dir
 (setq auto-save-file-name-transforms
@@ -244,7 +246,8 @@ deleting directories with permission
       version-control t)
 (setq create-lockfiles nil)
 #+END_SRC
-** Generate unique buffer names
+** unique buffer names
+Generating unique buffer names
 #+BEGIN_SRC emacs-lisp
 (require 'uniquify)
 (setq uniquify-buffer-name-style 'forward)
@@ -258,12 +261,12 @@ deleting directories with permission
 (column-number-mode t)
 (size-indication-mode nil)
 #+END_SRC
-** Theme
-** Adding ace-jump mode and bind it to c-x o
+** ace-jump
+Adding ace-jump mode and bind it to =M-p=
 #+BEGIN_SRC emacs-lisp
 (global-set-key (kbd "M-p") 'ace-window)
 #+END_SRC
-** scrolling the other window key binding 
+** scrolling next window 
 Scrolling up and down the other window
 #+BEGIN_SRC emacs-lisp
 (global-set-key (kbd "C-V") 'scroll-other-window-down)
@@ -282,7 +285,7 @@ Scrolling up and down the other window
 (global-set-key (kbd "C-=") 'er/expand-region)
 #+END_SRC
 
-** Open files in Desktop
+** Open files
 I want to open the corresponding foler hitting f4 key
 #+BEGIN_SRC emacs-lisp
 (defun xah-open-in-desktop ()
@@ -332,7 +335,7 @@ Version 2015-11-30"
               ("PHONE" :foreground "forest green" :weight bold))))
 
 #+END_SRC
-** Showing images in the org mode
+** images
 This will show the inline image using =C-c C-x C-v=
 #+BEGIN_SRC emacs-lisp
 (defun do-org-show-all-inline-images ()
@@ -341,36 +344,33 @@ This will show the inline image using =C-c C-x C-v=
 (global-set-key (kbd "C-c C-x C-v")
                 'do-org-show-all-inline-images)
 #+END_SRC 
-** Adding org-bullets for the org-mode
+** org-bullets
 #+BEGIN_SRC emacs-lisp
 (require 'org-bullets)
 (add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
 #+END_SRC
    
-** Use Syntax highlighting while editing
-
+** Syntax highlighting
 #+BEGIN_SRC emacs-lisp
 (setq org-src-fontify-natively t)
 #+END_SRC
-#+BEGIN_SRC emacs-lisp
 
-#+END_SRC
-** Adding org-agenda-files
+** org-agenda-files
 #+BEGIN_SRC emacs-lisp
   (setq org-agenda-files (list "~/Dropbox/org/home.org"
                                "~/Dropbox/org/scholar.org"))
 #+END_SRC
-** Adding org-directory
+** org-directory
 #+BEGIN_SRC emacs-lisp
 (setq org-directory "~/Dropbox/org")
 (setq org-default-notes-file "~/Dropbox/org/inbox.org")
 #+END_SRC
-** Timestamping the done part
+** Timestamping
 #+BEGIN_SRC emacs-lisp
 (setq org-log-done 'time)
 ;; (setq org-log-done 'note)
 #+END_SRC
-** Defining the org-mode globall keys for agenda view, ...
+** Global Keybindings ...
 #+BEGIN_SRC emacs-lisp
      (global-set-key "\C-cl" 'org-store-link)
      (global-set-key "\C-ca" 'org-agenda)
@@ -382,7 +382,7 @@ This will show the inline image using =C-c C-x C-v=
 (setq org-capture-templates
       (quote (("t" "todo" entry (file "~/Dropbox/org/inbox.org")
                "* TODO %?\n%U\n%a\n" )
-              ("n" "note" entry (file "~/Dropbox/org/inbox.org")
+              ("n" "note" entry (file "~/Dropbox/org/notes.org")
                "* %? :NOTE:\n%U\n%a\n")
               ("d" "Diary" entry (file+datetree "~/Dropbox/org/diary.org")
                "* %?\n%U\n" )
@@ -395,7 +395,9 @@ This will show the inline image using =C-c C-x C-v=
 ;;               "* NEXT Respond to %? subject %? \n SCHEDULED: %t\n%U\n%a\n" )
 
 #+END_SRC
-** Refiling configuration
+
+** Refiling 
+Configuration for refiling
 #+BEGIN_SRC emacs-lisp
 ; Targets include this file and any file contributing to the agenda - up to 9 levels deep
 (setq org-refile-targets (quote ((nil :maxlevel . 9)
@@ -417,24 +419,38 @@ This will show the inline image using =C-c C-x C-v=
 
 (setq org-refile-target-verify-function 'az/verify-refile-target)
 #+END_SRC
-** Defining customized keys for some stuff
+** Key-bindings
 #+BEGIN_SRC emacs-lisp
 (global-set-key (kbd "<f12>") 'org-agenda)
 (global-set-key (kbd "<f9> b") 'bbdb)
-(global-set-key (kbd "<f9> c") 'calendar)
-(global-set-key (kbd "<f9> w") 'forecast)
+(global-set-key (kbd "<f9> c") 'calendar) 
+(global-set-key (kbd "<f9> w") 'forecast);; weather forecast
 (global-set-key (kbd "C-c c") 'org-capture)
 #+END_SRC
-
-** allows changing todo states with S-left and S-right skipipng all of the normal processing when entering or leaving a todo state
+Key bindings for openning my org files quickly
 #+BEGIN_SRC emacs-lisp
-(setq org-treat-S-cursor-todo-selection-as-state-change nil)
+(global-set-key (kbd "\e\ei")
+		(lambda () (interactive) (find-file "~/Dropbox/org/inbox.org")))
+(global-set-key (kbd "\e\es")
+		(lambda () (interactive) (find-file "~/Dropbox/org/scholar.org")))
+(global-set-key (kbd "\e\eh")
+		(lambda () (interactive) (find-file "~/Dropbox/org/home.org")))
 #+END_SRC
-** Fast todo selection
+
+#+RESULTS:
+| lambda | nil | (interactive) | (find-file ~/Dropbox/org/home.org) |
+
+** Fast-Todo 
+it allows us to change the TODO state through the tags interface
 #+BEGIN_SRC emacs-lisp
 (setq org-use-fast-todo-selection t)
 #+END_SRC
-** Todo state triggers - [[http://doc.norang.ca/org-mode.html][source line]]
+allows changing todo states with S-left and S-right skipipng all of the normal processing when entering or leaving a todo state
+#+BEGIN_SRC emacs-lisp
+(setq org-treat-S-cursor-todo-selection-as-state-change nil)
+#+END_SRC
+** State Triggers - [[http://doc.norang.ca/org-mode.html][source line]]
+Having triggers for change of status
 #+BEGIN_SRC emacs-lisp
 (setq org-todo-state-tags-triggers
       (quote (("CANCELLED" ("CANCELLED" . t))
@@ -445,16 +461,18 @@ This will show the inline image using =C-c C-x C-v=
               ("NEXT" ("WAITING") ("CANCELLED") ("HOLD"))
               ("DONE" ("WAITING") ("CANCELLED") ("HOLD")))))
 #+END_SRC
-** Org indentation mode
+** Indentation
+I love having correct indentation!
 #+BEGIN_SRC emacs-lisp
   (setq org-indent-mode 1)
   (setq  org-startup-indented 1)
 #+END_SRC
 
-** Planning the day
+** Agenda View
+this is for customized org-agenda
 #+BEGIN_SRC emacs-lisp
   (setq org-agenda-custom-commands
-        '(("F" "Full List"
+        '(("f" "Full List"
             (
                (todo "NEXT")
                (tags-todo "TASK")
@@ -471,12 +489,13 @@ This will show the inline image using =C-c C-x C-v=
    )
 #+END_SRC
 
-** Setting the Diary 
+** Diary 
+Setting up the diary
 #+BEGIN_SRC emacs-lisp
 (setq diary-file "/Dropbox/org/diary.org")
 (setq org-agenda-include-diary t)
 #+END_SRC
-** Org-babel setup
+** Org-babel
 #+BEGIN_SRC emacs-lisp
 (custom-set-variables
  '(org-babel-load-languages (quote ((emacs-lisp . t) 
@@ -487,23 +506,13 @@ This will show the inline image using =C-c C-x C-v=
 (add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
 #+END_SRC
 
-** Key bindings to open files quickly
+** LaTeX
+Adding latex-image to see pictures of formula in orgmode
 #+BEGIN_SRC emacs-lisp
-(global-set-key (kbd "\e\ei")
-		(lambda () (interactive) (find-file "~/Dropbox/org/inbox.org")))
-(global-set-key (kbd "\e\es")
-		(lambda () (interactive) (find-file "~/Dropbox/org/scholar.org")))
-(global-set-key (kbd "\e\eh")
-		(lambda () (interactive) (find-file "~/Dropbox/org/home.org")))
+(setq org-latex-create-formula-image-program 'imagemagick)
+;; For changing the width of the image
+(setq org-image-actual-width nil)
 #+END_SRC
-
-#+RESULTS:
-| lambda | nil | (interactive) | (find-file ~/Dropbox/org/home.org) |
-
-* Weblog editing
-** Adding jekyll-mode 
-I have a Yasnipet for template and then export the body
-
 * Yasnipet
 ** Configuring Yasnippet
 I store my snippets in here
@@ -516,7 +525,8 @@ Note letting to indent automatically
 (setq yas/indent-line nil)
 #+END_SRC
 
-** Changing keys for conflict between yasnippet and orgmode
+** Conflict org & Yasnippet
+Changing keys for conflict between yasnippet and orgmode
 first we define this function
 #+BEGIN_SRC emacs-lisp
           (defun yas/org-very-safe-expand ()
@@ -786,7 +796,6 @@ Everyonce in a while I do complete indexing
 
 #+RESULTS:
 : elfeed-toggle-star
-
 
 * Browser
 Default Browser
