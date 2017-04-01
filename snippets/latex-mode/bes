@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: Begin equation subarray
+# key: bes
+# --
+\begin{subeqnarray}
+$0
+\begin{subeqnarray}
