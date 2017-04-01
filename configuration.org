@@ -17,7 +17,7 @@
         calendar-longitude -123.1207
         calendar-location-name "Vancouver")
 #+END_SRC
-  
+
 * Add =resources= to =load-path=
   
 #+BEGIN_SRC emacs-lisp
@@ -55,6 +55,30 @@
  (global-set-key (kbd "C-_") 'text-scale-decrease)
 #+END_SRC
 
+** Fill colum mode
+#+BEGIN_SRC emacs-lisp
+(setq fci-rule-column 90)
+(defun az/fill-or-unfill ()
+  "Like `fill-paragraph', but unfill if used twice."
+  (interactive)
+  (let ((fill-column
+         (if (eq last-command 'az/fill-or-unfill)
+             (progn (setq this-command nil)
+                    (point-max))
+           fill-column)))
+    (call-interactively #'fill-paragraph)))
+
+(global-set-key [remap fill-paragraph]
+                #'az/fill-or-unfill)
+#+END_SRC
+
+** Bookmark startpage
+#+BEGIN_SRC emacs-lisp
+(setq inhibit-splash-screen t)
+(require 'bookmark)
+(bookmark-bmenu-list)
+(switch-to-buffer "*Bookmark List*")
+#+END_SRC
 * Latex Mode
 ** Turning on Cd-latex for typping math
 #+BEGIN_SRC emacs-lisp
@@ -463,6 +487,19 @@ This will show the inline image using =C-c C-x C-v=
 (add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
 #+END_SRC
 
+** Key bindings to open files quickly
+#+BEGIN_SRC emacs-lisp
+(global-set-key (kbd "\e\ei")
+		(lambda () (interactive) (find-file "~/Dropbox/org/inbox.org")))
+(global-set-key (kbd "\e\es")
+		(lambda () (interactive) (find-file "~/Dropbox/org/scholar.org")))
+(global-set-key (kbd "\e\eh")
+		(lambda () (interactive) (find-file "~/Dropbox/org/home.org")))
+#+END_SRC
+
+#+RESULTS:
+| lambda | nil | (interactive) | (find-file ~/Dropbox/org/home.org) |
+
 * Weblog editing
 ** Adding jekyll-mode 
 I have a Yasnipet for template and then export the body
@@ -707,16 +744,66 @@ Everyonce in a while I do complete indexing
 (global-set-key (kbd "C-x g") 'google-this-mode-submap)
 #+END_SRC
 
+* elfeed
+** Setting the orgfile for data base
+#+BEGIN_SRC emacs-lisp
+(progn
+    (elfeed-org)
+    (setq rmh-elfeed-org-files (list "~/Dropbox/org/elfeed.org")))
+;;(setq rmh-elfeed-org-files (list "~/Dropbox/org/elfeed.org"))
+#+END_SRC
+
+#+RESULTS:
+
+** Setting some bookmarks
+#+BEGIN_SRC emacs-lisp
+(defhydra az/hydra-elfeed ()
+   "filter"
+   ("f" (elfeed-search-set-filter "@2-months-ago +fluids") "fluids")
+   ("p" (elfeed-search-set-filter "@2-months-ago +physics") "physics")
+   ("e" (elfeed-search-set-filter "@2-months-ago +econ") "econ blogs")
+   ("n" (elfeed-search-set-filter "@2-months-ago +wsj") "news wsj")
+   ("*" (elfeed-search-set-filter "@2-months-ago +star") "Starred")
+   ("M" elfeed-toggle-star "Mark")
+   ("A" (elfeed-search-set-filter "@2-months-ago") "All")
+   ("T" (elfeed-search-set-filter "@1-day-ago") "Today")
+   ("Q" bjm/elfeed-save-db-and-bury "Quit Elfeed" :color blue)
+   ("q" nil "quit" :color blue)
+   )
+#+END_SRC
+#+RESULTS:
+: az/hydra-elfeed/body
+** Setting the map key
+#+BEGIN_SRC emacs-lisp
+(define-key elfeed-search-mode-map "q" 'bjm/elfeed-save-db-and-bury)
+(define-key elfeed-search-mode-map "Q" 'bjm/elfeed-save-db-and-bury)
+(define-key elfeed-search-mode-map "j" 'az/hydra-elfeed/body)
+(define-key elfeed-search-mode-map "J" 'az/hydra-elfeed/body)
+(define-key elfeed-search-mode-map "m" 'elfeed-toggle-star)
+(define-key elfeed-search-mode-map "M" 'elfeed-toggle-star)
+(global-set-key (kbd "<f9> e") 'elfeed)
+#+END_SRC
+
+#+RESULTS:
+: elfeed-toggle-star
 
 
+* Browser
+Default Browser
+#+BEGIN_SRC emacs-lisp
+(setq browse-url-browser-function 'browse-url-generic
+      browse-url-generic-program "google-chrome")
+#+END_SRC
 
 * Explaining some modified key-modes I have
 - f12 -> org-agenda
-- f9 -> for checking emails with mu4e
+- f10 -> for checking emails with mu4e
 - f6 -> for preview-buffer in latex
 - f9 b -> bbdb mode
 - f9 c -> calendar
 - f9 w -> weather forecast
+- f9 e -> elfeed
+- f8 -> ispell-buffer
 - f4 -> open the corresponding foler outside
 - C-c c -> capture with emacs
 - C-c s -> for multi-term
@@ -727,5 +814,15 @@ Everyonce in a while I do complete indexing
 - C-{ -> shrink window vertically
 - c-} -> expand window vertically
 - C-= -> expand region mode
-- C-c p -> in mu4e store the links for next usage in some org-file pasting with C-c l
-  
+- C-c p -> in mu4e store the links for next usage in some org-file
+  pasting with C-c l
+- esc esc i -> opens inbox.org
+- esc esc s -> opens scholar.org
+- esc esc h -> opens home.org
+- How to reschedule: mark the items using *m* -> hit *B* bulk action list ->  *s* to reschedule
+
+** Boorkmarks
+- C+x r m -> bookmark set
+- C+x r l -> list of bookmarks
+- C+x r b -> bookmarkjump
+
