@@ -8,9 +8,7 @@
 #+END_SRC
 
 * Personal Information
-
 #+BEGIN_SRC emacs-lisp
-
   (setq user-full-name "Ahmad Zareei"
         user-mail-address "zareei@berkeley.edu"
         calendar-latitude 49.2827
@@ -40,15 +38,21 @@ Disabling Menu and Scroll bar
     (scroll-bar-mode -1))
  #+END_SRC
    
+** Theme
+#+BEGIN_SRC emacs-lisp
+  (load-theme 'zenburn t)
+  (load-theme 'tango-dark)
+#+END_SRC
+
+#+RESULTS:
+: t
+
 ** Highlight
 Hilight the current line
 #+BEGIN_SRC emacs-lisp
 (when window-system
-  (global-hl-line-mode))
-#+END_SRC
-** Theme
-#+BEGIN_SRC emacs-lisp
-  (load-theme 'zenburn t)
+  (global-hl-line-mode)
+  (set-face-background 'hl-line "#171717"))
 #+END_SRC
 ** Font size
 #+BEGIN_SRC emacs-lisp
@@ -73,13 +77,49 @@ Hilight the current line
                 #'az/fill-or-unfill)
 #+END_SRC
 
-** Bookmark startpage
+** Autofill
+#+BEGIN_SRC emacs-list
+(add-hook 'text-mode-hook 'turn-on-auto-fill)
+#+END_SRC
+=visual-line-mode= does the exact same as =auto-fill=, however it does
+not break lines, it just makes them appear that way!
 #+BEGIN_SRC emacs-lisp
+(add-hook 'text-mode-hook 'turn-on-visual-line-mode)
+#+END_SRC
+** Guide-key
+Show what keys I can press after C-c, C-x r, C-x v, and C-x 4
+#+BEGIN_SRC emacs-lisp
+(require 'guide-key)
+(setq guide-key/guide-key-sequence '("C-c" "C-x r" "C-x v" "C-x 4"))
+(guide-key-mode 1) ; Enable guide-key-mode
+#+END_SRC
+** Yes-or-No
+No need to type yes or no
+#+BEGIN_SRC emacs-lisp
+(fset 'yes-or-no-p 'y-or-n-p)
+#+END_SRC
+** Bookmark startpage
+#+BEGIN_SRC emacs-lis
 (setq inhibit-splash-screen t)
 (require 'bookmark)
 (bookmark-bmenu-list)
 (switch-to-buffer "*Bookmark List*")
 #+END_SRC
+** Dashboard
+#+BEGIN_SRC emacs-lisp
+(require 'dashboard)
+(dashboard-setup-startup-hook)
+(setq dashboard-startup-banner "~/.emacs.d/sources/startup.png")
+(setq dashboard-banner-logo-title "Dream Big, Work hard!")
+(setq dashboard-items '((bookmarks . 5)
+                        (recents  . 5)
+                        (agenda . 5)))
+;;;;                      (projects . 5)
+#+END_SRC
+
+#+RESULTS:
+
+
 * Latex Mode
 ** Cd-LaTeX 
 I turn on Cd-LaTeX for latex
@@ -143,7 +183,7 @@ in auctex
 #+BEGIN_SRC emacs-lisp
 (add-hook 'LaTeX-mode-hook 'turn-on-reftex)
 (setq reftex-plug-into-AUCTeX t)
-(setq reftex-default-bibliography '("~/Dropbox/Research/Bibtex/library/library.bib")) 
+(setq reftex-default-bibliography '("~/Dropbox/Research/Bibtex/library.bib")) 
 #+END_SRC
 * Programming mode
 ** Highlighting uncomiited Changes
@@ -195,7 +235,15 @@ deleting directories with permission
 #+BEGIN_SRC emacs-lisp
 (require 'tramp-term)
 #+END_SRC
-* Buffers and files
+** FreeFem++
+#+BEGIN_SRC emacs-lisp
+(autoload 'freefem++-mode "freefem++-mode"
+		"Major mode for editing FreeFem++ code." t)
+	(add-to-list 'auto-mode-alist '("\\.edp$" . freefem++-mode))
+	(add-to-list 'auto-mode-alist '("\\.idp$" . freefem++-mode))
+(setq freefempp-program "FreeFem++-nw")
+#+END_SRC
+* Buffers 
 ** recent files
 #+BEGIN_SRC emacs-lisp
 ;; save recent files
@@ -314,18 +362,47 @@ Version 2015-11-30"
 (setq global-flycheck-mode t)
 (global-set-key (kbd "<f8>") 'flyspell-buffer)
 #+END_SRC
+** Artbollocks mode
+#+BEGIN_SRC emacs-lisp
+(require 'artbollocks-mode)
+(setq artbollocks-weasel-words-regex
+          (concat "\\b" (regexp-opt
+                         '("one of the"
+                           "should"
+                           "just"
+                           "sort of"
+                           "a lot"
+                           "probably"
+                           "maybe"
+                           "perhaps"
+                           "really"
+                           "pretty"
+                           "nice"
+                           "action"
+                           "utilize"
+                           "leverage") t) "\\b"))
+(setq artbollocks-jargon nil)
+#+END_SRC
 * Org-mode
+** Habits
+#+BEGIN_SRC emacs-lisp
+(require 'org-habit)
+#+END_SRC
 ** Todo keywords
 #+BEGIN_SRC emacs-lisp
 (setq org-todo-keywords
-      (quote ((sequence "TODO(t)" "NEXT(n)" "SOMEDAY(s)" "|" "DONE(d)")
+      (quote ((sequence "TODO(t)" "NEXT(n)" "IN-PROGRESS(i)" "SOMEDAY(s)" "|" "DONE(d)")
               (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)" "PHONE" "MEETING"))))
 #+END_SRC
+
+
+
    - and changing colors for them
 #+BEGIN_SRC emacs-lisp
 (setq org-todo-keyword-faces
       (quote (("TODO" :foreground "red" :weight bold)
               ("NEXT" :foreground "blue" :weight bold)
+              ("IN-PROGRESS" :foreground "blue" :weight bold)
               ("DONE" :foreground "forest green" :weight bold)
               ("WAITING" :foreground "orange" :weight bold)
               ("HOLD" :foreground "magenta" :weight bold)
@@ -335,9 +412,13 @@ Version 2015-11-30"
               ("PHONE" :foreground "forest green" :weight bold))))
 
 #+END_SRC
+
+
+
 ** images
 This will show the inline image using =C-c C-x C-v=
 #+BEGIN_SRC emacs-lisp
+(setq org-startup-with-inline-images t)
 (defun do-org-show-all-inline-images ()
   (interactive)
   (org-display-inline-images t t))
@@ -429,12 +510,14 @@ Configuration for refiling
 #+END_SRC
 Key bindings for openning my org files quickly
 #+BEGIN_SRC emacs-lisp
-(global-set-key (kbd "\e\ei")
+(global-set-key (kbd "\e o i")
 		(lambda () (interactive) (find-file "~/Dropbox/org/inbox.org")))
-(global-set-key (kbd "\e\es")
+(global-set-key (kbd "\e o s")
 		(lambda () (interactive) (find-file "~/Dropbox/org/scholar.org")))
-(global-set-key (kbd "\e\eh")
+(global-set-key (kbd "\e o h")
 		(lambda () (interactive) (find-file "~/Dropbox/org/home.org")))
+(global-set-key (kbd "\e o j")
+		(lambda () (interactive) (find-file "~/Dropbox/org/journal.org")))
 #+END_SRC
 
 #+RESULTS:
@@ -459,6 +542,7 @@ Having triggers for change of status
               (done ("WAITING") ("HOLD"))
               ("TODO" ("WAITING") ("CANCELLED") ("HOLD"))
               ("NEXT" ("WAITING") ("CANCELLED") ("HOLD"))
+              ("IN-PROGRESS" ("WAITING") ("CANCELLED") ("HOLD"))
               ("DONE" ("WAITING") ("CANCELLED") ("HOLD")))))
 #+END_SRC
 ** Indentation
@@ -474,20 +558,25 @@ this is for customized org-agenda
   (setq org-agenda-custom-commands
         '(("f" "Full List"
             (
+               (agenda "" ((org-agenda-ndays 1))) 
+               (todo "IN-PROGRESS")
                (todo "NEXT")
+               (todo "TODO")
                (tags-todo "TASK")
                (tags-todo "PAPER")
                (tags-todo "SEMINAR")
+               (tags-todo "HABIT")
                (tags-todo "PROJECTS")
                (tags-todo "READ")))
-          ("t" "NEXT & TODO" ((todo "NEXT") (todo "TODO")))
-          ("j" "Journal paper" tags-todo "PAPER")
-          ("e" "SEMINAR" tags-todo "SEMINAR")
+          ("t" "IN-PROGRESS, NEXT & TODO" ((todo "IN-PROGRESS") (todo "NEXT") (todo "TODO")))
+          ("j" "JOURNAL PAPERS" tags-todo "PAPER")
+          ("s" "SEMINAR" tags-todo "SEMINAR")
           ("c" "CALL" todo "PHONE")
           ("r" "READ" tags-todo "READ")
           )
    )
 #+END_SRC
+
 
 ** Diary 
 Setting up the diary
@@ -513,6 +602,39 @@ Adding latex-image to see pictures of formula in orgmode
 ;; For changing the width of the image
 (setq org-image-actual-width nil)
 #+END_SRC
+** Archiving
+#+BEGIN_SRC emacs-lisp
+
+#+END_SRC
+** Jekyll
+#+BEGIN_SRC emacs-lisp
+#+END_SRC
+
+** Hydra and Clocking
+#+BEGIN_SRC emacs-lisp
+ (defhydra hydra-org-clock (:color blue :hint nil)
+   "
+Clock   In/out^     ^Edit^   ^Summary     (_?_)
+-----------------------------------------
+        _i_n         _e_dit   _g_oto entry
+        _c_ontinue   _q_uit   _d_isplay
+        _o_ut        ^ ^      _r_eport
+      "
+   ("i" org-clock-in)
+   ("o" org-clock-out)
+   ("c" org-clock-in-last)
+   ("e" org-clock-modify-effort-estimate)
+   ("q" org-clock-cancel)
+   ("g" org-clock-goto)
+   ("d" org-clock-display)
+   ("r" org-clock-report)
+   ("?" (org-info "Clocking commands")))
+ (global-set-key (kbd "C-c w ") 'hydra-org-clock/body)
+#+END_SRC
+
+#+RESULTS:
+: hydra-org-clock/body
+
 * Yasnipet
 ** Configuring Yasnippet
 I store my snippets in here
@@ -764,39 +886,32 @@ Everyonce in a while I do complete indexing
 #+END_SRC
 
 #+RESULTS:
+| ~/Dropbox/org/elfeed.org |
 
-** Setting some bookmarks
+** Testing a new hydra for elfeed
 #+BEGIN_SRC emacs-lisp
-(defhydra az/hydra-elfeed ()
-   "filter"
-   ("f" (elfeed-search-set-filter "@2-months-ago +fluids") "fluids")
-   ("p" (elfeed-search-set-filter "@2-months-ago +physics") "physics")
-   ("e" (elfeed-search-set-filter "@2-months-ago +econ") "econ blogs")
-   ("n" (elfeed-search-set-filter "@2-months-ago +wsj") "news wsj")
-   ("*" (elfeed-search-set-filter "@2-months-ago +star") "Starred")
-   ("M" elfeed-toggle-star "Mark")
-   ("A" (elfeed-search-set-filter "@2-months-ago") "All")
-   ("T" (elfeed-search-set-filter "@1-day-ago") "Today")
-   ("Q" bjm/elfeed-save-db-and-bury "Quit Elfeed" :color blue)
-   ("q" nil "quit" :color blue)
-   )
-#+END_SRC
-#+RESULTS:
-: az/hydra-elfeed/body
-** Setting the map key
-#+BEGIN_SRC emacs-lisp
-(define-key elfeed-search-mode-map "q" 'bjm/elfeed-save-db-and-bury)
-(define-key elfeed-search-mode-map "Q" 'bjm/elfeed-save-db-and-bury)
-(define-key elfeed-search-mode-map "j" 'az/hydra-elfeed/body)
-(define-key elfeed-search-mode-map "J" 'az/hydra-elfeed/body)
-(define-key elfeed-search-mode-map "m" 'elfeed-toggle-star)
-(define-key elfeed-search-mode-map "M" 'elfeed-toggle-star)
-(global-set-key (kbd "<f9> e") 'elfeed)
-#+END_SRC
+ (defhydra hydra-elfeed-filter (:color blue :hint nil)
+   "
+Filter   Category^     ^ ^      ^Summary     (_q_uit)
+-----------------------------------------
+        _f_luids      _n_ews    _a_ll
+        _p_hysics     _*_star   _t_oday
+        _e_con blogs  _m_ark    _r_efresh
+      "
+   ("f" (elfeed-search-set-filter "@2-months-ago +fluids"))
+   ("p" (elfeed-search-set-filter "@2-months-ago +physics"))
+   ("e" (elfeed-search-set-filter "@2-months-ago +econs"))
+   ("n" (elfeed-search-set-filter "@2-months-ago +news"))
+   ("*" (elfeed-search-set-filter "@2-months-ago +star"))
+   ("m" elfeed-toggle-star )
+   ("a" (elfeed-search-set-filter "@2-months-ago"))
+   ("t" (elfeed-search-set-filter "@1-day-ago"))
+   ("r" elfeed-show-refresh)
+   ("q" elfeed-kill-buffer)
+)
 
-#+RESULTS:
-: elfeed-toggle-star
-
+ (global-set-key (kbd "C-[ C-[") 'hydra-org-clock/body)
+#+END_SRC
 * Browser
 Default Browser
 #+BEGIN_SRC emacs-lisp
@@ -825,9 +940,9 @@ Default Browser
 - C-= -> expand region mode
 - C-c p -> in mu4e store the links for next usage in some org-file
   pasting with C-c l
-- esc esc i -> opens inbox.org
-- esc esc s -> opens scholar.org
-- esc esc h -> opens home.org
+- esc o i -> opens inbox.org
+- esc o s -> opens scholar.org
+- esc o h -> opens home.org
 - How to reschedule: mark the items using *m* -> hit *B* bulk action list ->  *s* to reschedule
 
 ** Boorkmarks
@@ -835,3 +950,4 @@ Default Browser
 - C+x r l -> list of bookmarks
 - C+x r b -> bookmarkjump
 
+  
