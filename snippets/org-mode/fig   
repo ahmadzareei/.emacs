@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: fig
+# key: fig
+# --
+#+CAPTION: $1
+#+NAME: $2
+#+ATTR_HTML: width="600px"
+#+ATTR_ORG: :width 600
+$0

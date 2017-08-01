@@ -119,7 +119,6 @@ No need to type yes or no
 
 #+RESULTS:
 
-
 * Latex Mode
 ** Cd-LaTeX 
 I turn on Cd-LaTeX for latex
@@ -243,6 +242,32 @@ deleting directories with permission
 	(add-to-list 'auto-mode-alist '("\\.idp$" . freefem++-mode))
 (setq freefempp-program "FreeFem++-nw")
 #+END_SRC
+** Matlab-mode
+#+BEGIN_SRC emacs-lisp
+(defun matlab-shell-here ()
+  "opens up a new matlab shell in the directory associated with the current buffer's file."
+  (interactive)
+  (split-window-right)
+  (other-window 1)
+  (matlab-shell))
+
+(defhydra hydra-matlab (:color blue
+                               :hint nil)
+  "
+ _c_: cell   _r_: region    _s_: start    _m_: interrupt
+ _l_: line   _C_: command   _S_: switch   _q_: quit
+"
+  ("c" matlab-shell-run-cell)
+  ("l" matlab-shell-run-region-or-line)
+  ("r" matlab-shell-run-region)
+  ("C" matlab-shell-run-command)
+  ("s" matlab-shell-here)
+  ("S" matlab-show-matlab-shell-buffer)
+  ("m" term-interrupt-subjob)
+  ("q" nil :color blue))
+(global-set-key (kbd "C-c m ") 'hydra-matlab/body)
+#+END_SRC
+
 * Buffers 
 ** recent files
 #+BEGIN_SRC emacs-lisp
@@ -358,10 +383,13 @@ Version 2015-11-30"
 
 #+END_SRC
 * Flycheck & flyspell
+
 #+BEGIN_SRC emacs-lisp
 (setq global-flycheck-mode t)
 (global-set-key (kbd "<f8>") 'flyspell-buffer)
+;;(global-set-key (kbd "<f8>") 'hydra-flycheck/body)
 #+END_SRC
+
 ** Artbollocks mode
 #+BEGIN_SRC emacs-lisp
 (require 'artbollocks-mode)
@@ -384,6 +412,41 @@ Version 2015-11-30"
 (setq artbollocks-jargon nil)
 #+END_SRC
 * Org-mode
+** Org-ref
+#+BEGIN_SRC emacs-lisp
+(require 'org-ref)
+(require 'helm-bibtex)
+(require 'org-edit-latex)
+(setq org-ref-open-pdf-function 'org-ref-get-mendeley-filename)
+;; (define-key helm-map (kbd "C-z") 'helm-select-action)
+
+ (defhydra hydra-org-ref (:color blue :hint nil)
+   "
+   Cite^     ^Insert Bibtex^         ^view^                (?)
+---------------------------------------------------------------
+  _c_ite      _b_ibtex crossref     _g_oogle scholar
+  _r_ef       _d_oi insert          _u_rl 
+  _l_abel     _q_uit                _e_xtract
+      "
+   ("c" org-ref-helm-insert-cite-link)
+   ("r" org-ref-helm-insert-ref-link)
+   ("l" org-ref-helm-insert-label-link)
+   ("b" crossref-add-bibtex-entry)
+   ("d" doi-insert-bibtex)
+   ("g" org-ref-google-scholar-at-point)
+   ("u" org-ref-open-url-at-point)
+   ("e" org-ref-extract-bibtex-entries)
+   ("?" org-ref-help)
+   ("q" keyboard-quit))
+
+ (global-set-key (kbd "C-c ( ") 'hydra-org-ref/body)
+
+#+END_SRC
+*** Invoking biblatex in the process
+#+BEGIN_SRC emacs-lisp
+(setq  org-latex-pdf-process
+       '("latexmk -shell-escape -bibtex -pdf %f"))
+#+END_SRC
 ** Habits
 #+BEGIN_SRC emacs-lisp
 (require 'org-habit)
@@ -412,8 +475,6 @@ Version 2015-11-30"
               ("PHONE" :foreground "forest green" :weight bold))))
 
 #+END_SRC
-
-
 
 ** images
 This will show the inline image using =C-c C-x C-v=
@@ -576,7 +637,6 @@ this is for customized org-agenda
           )
    )
 #+END_SRC
-
 
 ** Diary 
 Setting up the diary

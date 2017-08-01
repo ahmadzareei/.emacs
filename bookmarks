@@ -1,0 +1,34 @@
+;;;; Emacs Bookmark Format Version 1 ;;;;
+;;; This format is meant to be slightly human-readable;
+;;; nevertheless, you probably don't want to edit it.
+;;; -*- End Of Bookmark File Format Version Stamp -*-
+((#("website" 0 7
+   (face ivy-virtual))
+ (filename . "~/Dropbox/website/azareei/")
+ (front-context-string . "  /home/mathiew/")
+ (rear-context-string)
+ (position . 1))
+("emacs-config"
+ (filename . "~/.emacs.d/configuration.org")
+ (front-context-string . "gn\n    (elfeed-o")
+ (rear-context-string . " emacs-lisp\n(pro")
+ (position . 25917))
+(#("research" 0 8
+   (face ivy-virtual))
+ (filename . "~/Dropbox/Research/")
+ (front-context-string . "0_paper_cloaking")
+ (rear-context-string . "0K Dec  1  2015 ")
+ (position . 134))
+(#("org-files" 0 9
+   (face ivy-virtual))
+ (filename . "~/Dropbox/org/")
+ (front-context-string . "archive_home.org")
+ (rear-context-string . "49 Mar 16 14:16 ")
+ (position . 129))
+(#("ahmad_reza" 0 10
+   (face ivy-virtual))
+ (filename . "~/Dropbox/Ahmad_Reza/")
+ (front-context-string . "0_EM_CLOAKING\n  ")
+ (rear-context-string . "0K Dec  4  2015 ")
+ (position . 137))
+)
