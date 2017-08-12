@@ -834,7 +834,10 @@ Everyonce in a while I do complete indexing
 
 ;;; Save attachment (this can also be a function)
 (setq mu4e-attachment-dir "~/attachments")
+#+END_SRC
 
+This configuration doesn't work on my PC in the lab
+#+BEGIN_SRC emacs-lis
 ;; This is to use different settings for two different accounts that I have
 ;; Contexts
 (setq mu4e-contexts
@@ -867,6 +870,51 @@ Everyonce in a while I do complete indexing
                    (user-mail-address . "zareei@berkeley.edu")
                    ))))
 (setq mu4e-context-policy 'pick-first)
+#+END_SRC
+#+BEGIN_SRC emacs-lisp
+(defvar my-mu4e-account-alist
+  '(("gmail"
+     (user-mail-address  "ahmad.zareei@gmail.com")
+     (user-full-name     "Ahmad Zareei")
+     (mu4e-sent-folder . "/gmail/[Gmail].Sent\ Mail")
+     (mu4e-drafts-folder . "/gmail/[Gmail].Drafts")
+     (mu4e-trash-folder . "/gmail/[Gmail].Trash")
+     (mu4e-refile-folder . "/gmail/[Gmail].Archive")
+     (smtpmail-smtp-user "ahmad.zareei@gmail.com"))
+    ("bmail"
+     (user-mail-address  "zareei@berkeley.edu")
+     (mu4e-sent-folder . "/bmail/[Gmail].Sent Mail")
+     (mu4e-drafts-folder . "/bmail/[Gmail].Drafts")
+     (mu4e-trash-folder . "/bmail/[Gmail].Trash")
+     (smtpmail-smtp-user "zareei@berkeley.edu")
+     (smtpmail-smtp-server "smtp.gmail.com")
+     (mu4e-refile-folder . "/bmail/[Gmail].Archive"))))
+
+(setq mu4e-user-mail-address-list
+      (mapcar (lambda (account) (cadr (assq 'user-mail-address account)))
+              my-mu4e-account-alist))
+
+(defun my-mu4e-set-account ()
+  "Set the account for composing a message."
+  (let* ((account
+          (if mu4e-compose-parent-message
+              (let ((maildir (mu4e-message-field mu4e-compose-parent-message :maildir)))
+                (string-match "/\\(.*?\\)/" maildir)
+                (match-string 1 maildir))
+            (completing-read (format "Compose with account: (%s) "
+                                     (mapconcat #'(lambda (var) (car var))
+                                                my-mu4e-account-alist "/"))
+                             (mapcar #'(lambda (var) (car var)) my-mu4e-account-alist)
+                             nil t nil nil (caar my-mu4e-account-alist))))
+         (account-vars (cdr (assoc account my-mu4e-account-alist))))
+    (if account-vars
+        (mapc #'(lambda (var)
+                  (set (car var) (cadr var)))
+              account-vars)
+      (error "No email account found"))))
+
+;; ask for account when composing mail
+(add-hook 'mu4e-compose-pre-hook 'my-mu4e-set-account)
 #+END_SRC
 *** Some more modification beautifying mu4e for my use
 #+BEGIN_SRC emacs-lisp
@@ -979,6 +1027,7 @@ Default Browser
       browse-url-generic-program "google-chrome")
 #+END_SRC
 
+* Reveal.js
 * Explaining some modified key-modes I have
 - f12 -> org-agenda
 - f10 -> for checking emails with mu4e
