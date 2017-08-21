@@ -11,9 +11,9 @@
 #+BEGIN_SRC emacs-lisp
   (setq user-full-name "Ahmad Zareei"
         user-mail-address "zareei@berkeley.edu"
-        calendar-latitude 49.2827
-        calendar-longitude -123.1207
-        calendar-location-name "Vancouver")
+        calendar-latitude 37.8716
+        calendar-longitude -122.2727
+        calendar-location-name "Berkeley, CA")
 #+END_SRC
 
 * Add =resources= to =load-path=
@@ -835,8 +835,8 @@ Everyonce in a while I do complete indexing
 ;;; Save attachment (this can also be a function)
 (setq mu4e-attachment-dir "~/attachments")
 #+END_SRC
-
 This configuration doesn't work on my PC in the lab
+So I commented out here, instead I use the next one in the lab
 #+BEGIN_SRC emacs-lis
 ;; This is to use different settings for two different accounts that I have
 ;; Contexts
@@ -871,6 +871,7 @@ This configuration doesn't work on my PC in the lab
                    ))))
 (setq mu4e-context-policy 'pick-first)
 #+END_SRC
+
 #+BEGIN_SRC emacs-lisp
 (defvar my-mu4e-account-alist
   '(("gmail"
