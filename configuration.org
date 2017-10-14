@@ -109,7 +109,7 @@ No need to type yes or no
 #+BEGIN_SRC emacs-lisp
 (require 'dashboard)
 (dashboard-setup-startup-hook)
-(setq dashboard-startup-banner "~/.emacs.d/sources/startup.png")
+(setq dashboard-startup-banner "~/.emacs.d/sources/startup3.png")
 (setq dashboard-banner-logo-title "Dream Big, Work hard!")
 (setq dashboard-items '((bookmarks . 5)
                         (recents  . 5)

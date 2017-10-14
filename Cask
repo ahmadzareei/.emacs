@@ -46,6 +46,7 @@
 (depends-on "multi-term")
 (depends-on "oauth2")
 (depends-on "ob-ipython")
+(depends-on "org")
 (depends-on "org-bullets")
 (depends-on "org-edit-latex")
 (depends-on "org-jekyll")
