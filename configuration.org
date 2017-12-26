@@ -111,9 +111,10 @@ No need to type yes or no
 (dashboard-setup-startup-hook)
 (setq dashboard-startup-banner "~/.emacs.d/sources/startup3.png")
 (setq dashboard-banner-logo-title "Dream Big, Work hard!")
+
 (setq dashboard-items '((bookmarks . 5)
-                        (recents  . 5)
-                        (agenda . 5)))
+                         (recents  . 5)))
+;;                          (agenda . 5)))
 ;;;;                      (projects . 5)
 #+END_SRC
 

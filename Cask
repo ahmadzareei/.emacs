@@ -13,6 +13,7 @@
 (depends-on "color-theme")
 (depends-on "color-theme-sanityinc-solarized")
 (depends-on "counsel")
+(depends-on "counsel-dash")
 (depends-on "csv")
 (depends-on "dashboard")
 (depends-on "diff-hl")

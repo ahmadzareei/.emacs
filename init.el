@@ -6,7 +6,7 @@
   ;; ELPA 
   (setq load-path (remove-if (lambda (x) (string-match-p "org-20" x)) load-path))
 
-  (setq custom-org-path "/home/mathiew/.emacs.d/.cask/26.0/elpa/org-20170807")   
+  (setq custom-org-path "/home/mathiew/.emacs.d/.cask/24.5/elpa/org-20171225")   
   (add-to-list 'load-path custom-org-path)
 
 (org-babel-load-file "~/.emacs.d/configuration.org")
