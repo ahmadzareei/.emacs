@@ -164,6 +164,7 @@ Adding latex-preview-pane-mode to view compiled files instead of openning evice
      (output-pdf "preview-pane-mode")
      (output-html "xdg-open")))))
 #+END_SRC
+
 ** key-bindings
    + I love to use preview-buffer, and I use f6 to activate this mode, instead of C-c p C-b
 #+BEGIN_SRC emacs-lisp
@@ -508,6 +509,13 @@ This will show the inline image using =C-c C-x C-v=
 (setq org-directory "~/Dropbox/org")
 (setq org-default-notes-file "~/Dropbox/org/inbox.org")
 #+END_SRC
+** Setting up orgmobile
+#+BEGIN_SRC emacs-lisp
+;; Set to the name of the file where new notes will be stored
+(setq org-mobile-inbox-for-pull "~/Dropbox/org/inbox.org")
+;; Set to <your Dropbox root directory>/MobileOrg.
+(setq org-mobile-directory "~/Dropbox/Apps/MobileOrg")
+#+END_SRC
 ** Timestamping
 #+BEGIN_SRC emacs-lisp
 (setq org-log-done 'time)
@@ -650,6 +658,7 @@ Setting up the diary
 (custom-set-variables
  '(org-babel-load-languages (quote ((emacs-lisp . t) 
                                     (python . t) 
+                                    (latex . t)
                                     (octave . t)
                                     (gnuplot . t))))
  '(org-confirm-babel-evaluate nil))
@@ -695,6 +704,195 @@ Clock   In/out^     ^Edit^   ^Summary     (_?_)
 
 #+RESULTS:
 : hydra-org-clock/body
+
+** justifying Equations and numbering
+
+Usually we can toggle in orgmode to see the equations with C-c C-x C-l
+This is how to justify equations to the middle
+#+BEGIN_SRC emacs-lisp
+;; specify the justification you want
+(require 'ov)
+(plist-put org-format-latex-options :justify 'left)
+
+(defun org-justify-fragment-overlay (beg end image imagetype)
+  "Adjust the justification of a LaTeX fragment.
+The justification is set by :justify in
+`org-format-latex-options'. Only equations at the beginning of a
+line are justified."
+  (cond
+   ;; Centered justification
+   ((and (eq 'center (plist-get org-format-latex-options :justify)) 
+         (= beg (line-beginning-position)))
+    (let* ((img (create-image image 'imagemagick t))
+           (width (car (image-size img)))
+           (offset (floor (- (/ (window-text-width) 2) (/ width 2)))))
+      (overlay-put (ov-at) 'before-string (make-string offset ? ))))
+   ;; Right justification
+   ((and (eq 'right (plist-get org-format-latex-options :justify)) 
+         (= beg (line-beginning-position)))
+    (let* ((img (create-image image 'imagemagick t))
+           (width (car (image-display-size (overlay-get (ov-at) 'display))))
+           (offset (floor (- (window-text-width) width (- (line-end-position) end)))))
+      (overlay-put (ov-at) 'before-string (make-string offset ? ))))))
+
+(defun org-latex-fragment-tooltip (beg end image imagetype)
+  "Add the fragment tooltip to the overlay and set click function to toggle it."
+  (overlay-put (ov-at) 'help-echo
+               (concat (buffer-substring beg end)
+                       "mouse-1 to toggle."))
+  (overlay-put (ov-at) 'local-map (let ((map (make-sparse-keymap)))
+                                    (define-key map [mouse-1]
+                                      `(lambda ()
+                                         (interactive)
+                                         (org-remove-latex-fragment-image-overlays ,beg ,end)))
+                                    map)))
+
+;; advise the function to a
+(advice-add 'org--format-latex-make-overlay :after 'org-justify-fragment-overlay)
+(advice-add 'org--format-latex-make-overlay :after 'org-latex-fragment-tooltip)
+;; That is it. If you get tired of the advice, remove it like this:
+
+;;(advice-remove 'org--format-latex-make-overlay 'org-justify-fragment-overlay)
+;;(advice-remove 'org--format-latex-make-overlay 'org-latex-fragment-tooltip)
+
+
+
+(defun org-renumber-environment (orig-func &rest args)
+  "A function to inject numbers in LaTeX fragment previews."
+  (let ((results '()) 
+	(counter -1)
+	(numberp))
+
+    (setq results (loop for (begin .  env) in 
+			(org-element-map (org-element-parse-buffer) 'latex-environment
+			  (lambda (env)
+			    (cons
+			     (org-element-property :begin env)
+			     (org-element-property :value env))))
+			collect
+			(cond
+			 ((and (string-match "\\\\begin{equation}" env)
+			       (not (string-match "\\\\tag{" env)))
+			  (incf counter)
+			  (cons begin counter))
+			 ((string-match "\\\\begin{align}" env)
+			  (prog2
+			      (incf counter)
+			      (cons begin counter)			    
+			    (with-temp-buffer
+			      (insert env)
+			      (goto-char (point-min))
+			      ;; \\ is used for a new line. Each one leads to a number
+			      (incf counter (count-matches "\\\\$"))
+			      ;; unless there are nonumbers.
+			      (goto-char (point-min))
+			      (decf counter (count-matches "\\nonumber")))))
+			 (t
+			  (cons begin nil)))))
+
+    (when (setq numberp (cdr (assoc (point) results)))
+      (setf (car args)
+	    (concat
+	     (format "\\setcounter{equation}{%s}\n" numberp)
+	     (car args)))))
+  
+  (apply orig-func args))
+
+(advice-add 'org-create-formula-image :around #'org-renumber-environment)
+
+;; changing the size of the formula to 1.5
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.50))
+
+#+END_SRC
+
+Automatic Toggle
+#+BEGIN_SRC emacs-lisp
+(defvar az/org-latex-fragment-last nil
+    "Holds last fragment/environment you were on.")
+
+  (defun az/org-in-latex-fragment-p ()
+    "Return the point where the latex fragment begins, if inside
+  a latex fragment. Else return false"
+    (let* ((el (org-element-context))
+           (el-type (car el)))
+      (and (or (eq 'latex-fragment el-type) (eq 'latex-environment el-type))
+          (org-element-property :begin el))))
+
+  (defun az/org-latex-fragment-toggle ()
+    "Toggle a latex fragment image "
+    (and (eq 'org-mode major-mode)
+	 (let ((begin (az/org-in-latex-fragment-p)))
+           (cond
+            ;; were on a fragment and now on a new fragment
+            ((and
+              ;; fragment we were on
+              az/org-latex-fragment-last
+              ;; and are on a fragment now
+              begin
+
+              ;; but not on the last one this is a little tricky. as you edit the
+              ;; fragment, it is not equal to the last one. We use the begin
+              ;; property which is less likely to change for the comparison.
+              (not (and az/org-latex-fragment-last
+			(= begin
+			   az/org-latex-fragment-last))))
+             ;; go back to last one and put image back, provided there is still a fragment there
+             (save-excursion
+               (goto-char az/org-latex-fragment-last)
+               (when (az/org-in-latex-fragment-p) (org-preview-latex-fragment))
+
+               ;; now remove current image
+               (goto-char begin)
+               (let ((ov (loop for ov in (org--list-latex-overlays)
+                               if
+                               (and
+				(<= (overlay-start ov) (point))
+				(>= (overlay-end ov) (point)))
+                               return ov)))
+		 (when ov
+                   (delete-overlay ov)))
+               ;; and save new fragment
+               (setq az/org-latex-fragment-last begin)))
+
+            ;; were on a fragment and now are not on a fragment
+            ((and
+              ;; not on a fragment now
+              (not begin)
+              ;; but we were on one
+              az/org-latex-fragment-last)
+             ;; put image back on, provided that there is still a fragment here.
+             (save-excursion
+               (goto-char az/org-latex-fragment-last)
+               (when (az/org-in-latex-fragment-p) (org-preview-latex-fragment)))
+
+             ;; unset last fragment
+             (setq az/org-latex-fragment-last nil))
+
+            ;; were not on a fragment, and now are
+            ((and
+              ;; we were not one one
+              (not az/org-latex-fragment-last)
+              ;; but now we are
+              begin)
+             ;; remove image
+             (save-excursion
+               (goto-char begin)
+               (let ((ov (loop for ov in (org--list-latex-overlays)
+                               if
+                               (and
+				(<= (overlay-start ov) (point))
+				(>= (overlay-end ov) (point)))
+                               return ov)))
+		 (when ov
+                   (delete-overlay ov))))
+             (setq az/org-latex-fragment-last begin))))))
+#+END_SRC
+
+Require ox-manuscript
+#+BEGIN_SRC emacs-lisp
+(require 'ox-manuscript)
+#+END_SRC
+
 
 * Yasnipet
 ** Configuring Yasnippet
@@ -838,9 +1036,10 @@ Everyonce in a while I do complete indexing
 #+END_SRC
 This configuration doesn't work on my PC in the lab
 So I commented out here, instead I use the next one in the lab
-#+BEGIN_SRC emacs-lis
+#+BEGIN_SRC emacs-lisp
 ;; This is to use different settings for two different accounts that I have
 ;; Contexts
+(require 'mu4e-context)
 (setq mu4e-contexts
       `( ,(make-mu4e-context
            :name "Gmail - ahmad.zareei@gmail.com"
@@ -873,12 +1072,12 @@ So I commented out here, instead I use the next one in the lab
 (setq mu4e-context-policy 'pick-first)
 #+END_SRC
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lis
 (defvar my-mu4e-account-alist
   '(("gmail"
      (user-mail-address  "ahmad.zareei@gmail.com")
      (user-full-name     "Ahmad Zareei")
-     (mu4e-sent-folder . "/gmail/[Gmail].Sent\ Mail")
+     (mu4e-sent-folder . "/gmail/[Gmail].Sent Mail")
      (mu4e-drafts-folder . "/gmail/[Gmail].Drafts")
      (mu4e-trash-folder . "/gmail/[Gmail].Trash")
      (mu4e-refile-folder . "/gmail/[Gmail].Archive")
