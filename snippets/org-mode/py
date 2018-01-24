@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: py
+# key: py
+# --
+python :python /home/mathiew/anaconda3/bin/python :results output
+$0

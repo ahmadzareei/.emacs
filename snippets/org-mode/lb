@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: lb
+# key: lb
+# --
+\left[ $1 \right] $0

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: ud
+# key: ud
+# --
+\underline{$1} $0
