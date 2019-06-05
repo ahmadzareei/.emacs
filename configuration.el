@@ -9,7 +9,7 @@
 
 (add-to-list 'load-path "~/.emacs.d/sources/")
 
-(require 'cask "~/.cask/cask.el")
+(require 'cask "~/.emacs.d/cask/cask.el")
 (cask-initialize) 
 (require 'pallet)
 (pallet-mode t)
@@ -110,9 +110,6 @@
 
 (global-set-key (kbd "C-c s") 'multi-term)
 
-(require 'dired+)
-(require 'dired-open)
-
 (setq dired-open-extensions
       '(("pdf" . "evince")
         ("mkv" . "vlc")
@@ -157,6 +154,25 @@
   ("m" term-interrupt-subjob)
   ("q" nil :color blue))
 (global-set-key (kbd "C-c m ") 'hydra-matlab/body)
+
+(require 'ein)
+(require 'ein-notebook)
+(require 'ein-subpackages)
+
+(pyenv-mode)
+(elpy-enable)
+(setenv "WORKON_HOME" "~/.pyenv/versions/")
+(setq elpy-rpc-backend "jedi")
+;; (setq python-shell-interpreter "~/.pyenv/shims/python3")
+(add-hook 'python-mode-hook 'jedi:setup)
+(setq jedi:server-args
+      '("--virtual-env" "/home/mathiew/.pyenv/versions/basic"
+        "--virtual-env" "/home/mathiew/.pyenv/versions/venv"))
+(setq elpy-rpc-backend "jedi")
+(elpy-rpc-restart)
+(setq venv-location (expand-file-name "/home/mathiew/.pyenv/versions"))   ;; Change with the path to your virtualenvs
+;; Used python-environment.el and by extend jedi.el
+(setq python-environment-directory venv-location)
 
 ;; save recent files
 (require 'recentf)
@@ -383,6 +399,7 @@ Version 2015-11-30"
 (global-set-key (kbd "<f9> b") 'bbdb)
 (global-set-key (kbd "<f9> c") 'calendar) 
 (global-set-key (kbd "<f9> w") 'forecast);; weather forecast
+(global-set-key (kbd "<f9> e") 'elfeed);; elfeed browser
 (global-set-key (kbd "C-c c") 'org-capture)
 
 (global-set-key (kbd "\e o i")

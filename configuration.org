@@ -22,7 +22,7 @@
 #+END_SRC
 ** a great [[http://www.lambdacat.com/modern-emacs-package-management-with-cask-and-pallet/][link]] on how to configure cask and pallet
 #+BEGIN_SRC emacs-lisp
-   (require 'cask "~/.cask/cask.el")
+   (require 'cask "~/.emacs.d/cask/cask.el")
    (cask-initialize) 
    (require 'pallet)
    (pallet-mode t)
@@ -200,10 +200,10 @@ in auctex
 (global-set-key (kbd "C-c s") 'multi-term)
 #+END_SRC
 ** dired
-#+BEGIN_SRC emacs-lisp
-(require 'dired+)
-(require 'dired-open)
-#+END_SRC
+  #+BEGIN 
+  (require 'dired+)
+  (require 'dired-open)
+  #+END
 
 Open media files accordingly
 #+BEGIN_SRC emacs-lisp
@@ -269,6 +269,47 @@ deleting directories with permission
   ("q" nil :color blue))
 (global-set-key (kbd "C-c m ") 'hydra-matlab/body)
 #+END_SRC
+
+** Ipython Notebook
+#+BEGIN_SRC emacs-lisp
+(require 'ein)
+(require 'ein-notebook)
+(require 'ein-subpackages)
+#+END_SRC
+** Python jedi
+  
+#+BEGIN_SRC emacs-lisp
+(pyenv-mode)
+(elpy-enable)
+(setenv "WORKON_HOME" "~/.pyenv/versions/")
+(setq elpy-rpc-backend "jedi")
+;; (setq python-shell-interpreter "~/.pyenv/shims/python3")
+(add-hook 'python-mode-hook 'jedi:setup)
+(setq jedi:server-args
+      '("--virtual-env" "/home/mathiew/.pyenv/versions/basic"
+        "--virtual-env" "/home/mathiew/.pyenv/versions/venv"))
+(setq elpy-rpc-backend "jedi")
+(elpy-rpc-restart)
+(setq venv-location (expand-file-name "/home/mathiew/.pyenv/versions"))   ;; Change with the path to your virtualenvs
+;; Used python-environment.el and by extend jedi.el
+(setq python-environment-directory venv-location)
+#+END_SRC 
+
+ 
+
+#
+(add-hook 'python-mode-hook 'jedi:setup)
+(setq jedi:complete-on-dot t)
+;; (setq jedi:environment-root (quote /home/mathiew/anaconda3/envs/image_processing))
+(setq jedi:server-args
+      '("--sys-path" "/home/mathiew/anaconda3/envs/image_processing/lib/python3.7/site-packages/"
+        "--sys-path" "/home/mathiew/anaconda3/envs/fenicsproject/lib/python3.7/site-packages"
+        "--sys-path" "/home/mathiew/anaconda3/envs/defnet_mnist/lib/python3.7/site-packages"
+        ;; "--sys-path" "ROOT_DIR_2/envs/NAME_2/.../site-packages"
+        ;; ... and more! ...
+        ))
+#
+
 
 * Buffers 
 ** recent files
@@ -576,6 +617,7 @@ Configuration for refiling
 (global-set-key (kbd "<f9> b") 'bbdb)
 (global-set-key (kbd "<f9> c") 'calendar) 
 (global-set-key (kbd "<f9> w") 'forecast);; weather forecast
+(global-set-key (kbd "<f9> e") 'elfeed);; elfeed browser
 (global-set-key (kbd "C-c c") 'org-capture)
 #+END_SRC
 Key bindings for openning my org files quickly
@@ -893,7 +935,6 @@ Require ox-manuscript
 (require 'ox-manuscript)
 #+END_SRC
 
-
 * Yasnipet
 ** Configuring Yasnippet
 I store my snippets in here
@@ -1195,7 +1236,7 @@ So I commented out here, instead I use the next one in the lab
 #+END_SRC
 
 #+RESULTS:
-| ~/Dropbox/org/elfeed.org |
+
 
 ** Testing a new hydra for elfeed
 #+BEGIN_SRC emacs-lisp
