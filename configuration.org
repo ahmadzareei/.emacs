@@ -277,38 +277,27 @@ deleting directories with permission
 (require 'ein-subpackages)
 #+END_SRC
 ** Python jedi
-  
+pyenv learning: https://amaral.northwestern.edu/resources/guides/pyenv-tutorial  
 #+BEGIN_SRC emacs-lisp
 (pyenv-mode)
 (elpy-enable)
 (setenv "WORKON_HOME" "~/.pyenv/versions/")
 (setq elpy-rpc-backend "jedi")
-;; (setq python-shell-interpreter "~/.pyenv/shims/python3")
 (add-hook 'python-mode-hook 'jedi:setup)
 (setq jedi:server-args
       '("--virtual-env" "/home/mathiew/.pyenv/versions/basic"
-        "--virtual-env" "/home/mathiew/.pyenv/versions/venv"))
+       ;;  "--virtual-env" "/home/mathiew/.pyenv/versions/venv"
+))
 (setq elpy-rpc-backend "jedi")
 (elpy-rpc-restart)
 (setq venv-location (expand-file-name "/home/mathiew/.pyenv/versions"))   ;; Change with the path to your virtualenvs
 ;; Used python-environment.el and by extend jedi.el
 (setq python-environment-directory venv-location)
+(setq ein:notebook-modes '(ein:notebook-mumamo-mode ein:notebook-python-mode))
+
 #+END_SRC 
 
  
-
-#
-(add-hook 'python-mode-hook 'jedi:setup)
-(setq jedi:complete-on-dot t)
-;; (setq jedi:environment-root (quote /home/mathiew/anaconda3/envs/image_processing))
-(setq jedi:server-args
-      '("--sys-path" "/home/mathiew/anaconda3/envs/image_processing/lib/python3.7/site-packages/"
-        "--sys-path" "/home/mathiew/anaconda3/envs/fenicsproject/lib/python3.7/site-packages"
-        "--sys-path" "/home/mathiew/anaconda3/envs/defnet_mnist/lib/python3.7/site-packages"
-        ;; "--sys-path" "ROOT_DIR_2/envs/NAME_2/.../site-packages"
-        ;; ... and more! ...
-        ))
-#
 
 
 * Buffers 
