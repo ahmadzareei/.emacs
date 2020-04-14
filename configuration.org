@@ -1,0 +1,1050 @@
+#+TITLE: Emacs configuration
+
+* [[https://github.com/technomancy/better-defaults][Better Defaults]]
+
+#+BEGIN_SRC emacs-lisp
+(load-file "~/.emacs.d/sources/better-defaults.el")
+(require 'better-defaults)
+#+END_SRC
+
+* Personal Information
+#+BEGIN_SRC emacs-lisp
+  (setq user-full-name "Ahmad Zareei"
+        user-mail-address "zareei@berkeley.edu"
+        calendar-latitude 42.3601
+        calendar-longitude 71.0589
+        calendar-location-name "Boston, MA")
+#+END_SRC
+
+* Add =resources= to =load-path=
+#+BEGIN_SRC emacs-lisp
+  (add-to-list 'load-path "~/.emacs.d/sources/")
+#+END_SRC
+** a great [[http://www.lambdacat.com/modern-emacs-package-management-with-cask-and-pallet/][link]] on how to configure cask and pallet
+#+BEGIN_SRC emacs-lisp
+   (require 'cask "~/.emacs.d/cask/cask.el")
+   (cask-initialize) 
+   (require 'pallet)
+   (pallet-mode t)
+#+END_SRC
+  
+* UI preferences
+** Menu and Scroll bar
+Disabling Menu and Scroll bar
+ #+BEGIN_SRC emacs-lisp
+  (tool-bar-mode 0)
+  (menu-bar-mode 0)
+  (when window-system
+    (scroll-bar-mode -1))
+ #+END_SRC
+   
+** Theme
+#+BEGIN_SRC emacs-lisp
+  (load-theme 'zenburn t)
+  (load-theme 'tango-dark)
+#+END_SRC
+
+#+RESULTS:
+: t
+
+** Highlight
+Hilight the current line
+#+BEGIN_SRC emacs-lisp
+(when window-system
+  (global-hl-line-mode)
+  (set-face-background 'hl-line "#171717"))
+#+END_SRC
+** Font size
+#+BEGIN_SRC emacs-lisp
+ (global-set-key (kbd "C-+") 'text-scale-increase)
+ (global-set-key (kbd "C-_") 'text-scale-decrease)
+#+END_SRC
+
+** Fill colum mode
+#+BEGIN_SRC emacs-lisp
+(setq fci-rule-column 90)
+(defun az/fill-or-unfill ()
+  "Like `fill-paragraph', but unfill if used twice."
+  (interactive)
+  (let ((fill-column
+         (if (eq last-command 'az/fill-or-unfill)
+             (progn (setq this-command nil)
+                    (point-max))
+           fill-column)))
+    (call-interactively #'fill-paragraph)))
+
+(global-set-key [remap fill-paragraph]
+                #'az/fill-or-unfill)
+#+END_SRC
+
+** Autofill
+#+BEGIN_SRC emacs-list
+(add-hook 'text-mode-hook 'turn-on-auto-fill)
+#+END_SRC
+=visual-line-mode= does the exact same as =auto-fill=, however it does
+not break lines, it just makes them appear that way!
+#+BEGIN_SRC emacs-lisp
+(add-hook 'text-mode-hook 'turn-on-visual-line-mode)
+#+END_SRC
+** Guide-key
+Show what keys I can press after C-c, C-x r, C-x v, and C-x 4
+#+BEGIN_SRC emacs-lisp
+(require 'guide-key)
+(setq guide-key/guide-key-sequence '("C-c" "C-x r" "C-x v" "C-x 4"))
+(guide-key-mode 1) ; Enable guide-key-mode
+#+END_SRC
+** Yes-or-No
+No need to type yes or no
+#+BEGIN_SRC emacs-lisp
+(fset 'yes-or-no-p 'y-or-n-p)
+#+END_SRC
+** Bookmark startpage
+#+BEGIN_SRC emacs-lis
+(setq inhibit-splash-screen t)
+(require 'bookmark)
+(bookmark-bmenu-list)
+(switch-to-buffer "*Bookmark List*")
+#+END_SRC
+** Dashboard
+#+BEGIN_SRC emacs-lisp
+(require 'dashboard)
+(dashboard-setup-startup-hook)
+(setq dashboard-startup-banner "~/.emacs.d/sources/startup3.png")
+(setq dashboard-banner-logo-title "Dream Big, Work hard!")
+
+(setq dashboard-items '((bookmarks . 5)
+                         (recents  . 5)))
+;;                          (agenda . 5)))
+;;;;                      (projects . 5)
+#+END_SRC
+
+#+RESULTS:
+
+* Latex Mode
+** Cd-LaTeX 
+I turn on Cd-LaTeX for latex
+For a full list of stuff available see C-c ?
+#+BEGIN_SRC emacs-lisp
+  (add-hook 'LaTeX-mode-hook 'turn-on-cdlatex)   ; with AUCTeX LaTeX mode
+#+END_SRC
+** LaTeX extra mode
+=C-c C-a= will compile everything and is awesome 
+#+BEGIN_SRC emacs-lisp
+(add-hook 'LaTeX-mode-hook #'latex-extra-mode)
+#+END_SRC 
+unfortunately this LaTeX extra mode disables =C-c C-f= mode for font
+selection so we turn it off in latex-extra to bind =-c C-f= to font
+selection
+#+BEGIN_SRC emacs-lisp
+(custom-set-variables '(latex/override-font-map nil))
+#+END_SRC
+** LaTex-preview-pane-mode 
+Adding latex-preview-pane-mode to view compiled files instead of openning evice
+#+BEGIN_SRC emacs-lisp
+(eval-after-load "tex"
+  '(add-to-list
+    'TeX-view-program-list
+    '("preview-pane-mode"
+      latex-preview-pane-mode)))
+;; (add-hook 'LaTeX-mode-hook #'latex-preview-pane-mode)
+(custom-set-variables
+ '(TeX-view-program-list
+   (quote
+    (("preview-pane-mode"
+      (latex-preview-pane-mode)
+      nil))))
+ '(TeX-view-program-selection
+   (quote
+    (((output-dvi has-no-display-manager)
+      "dvi2tty")
+     ((output-dvi style-pstricks)
+      "dvips and gv")
+     (output-dvi "xdvi")
+     (engine-omega "Atril")
+     (output-pdf "preview-pane-mode")
+     (output-html "xdg-open")))))
+#+END_SRC
+
+** key-bindings
+   + I love to use preview-buffer, and I use f6 to activate this mode, instead of C-c p C-b
+#+BEGIN_SRC emacs-lisp
+(add-hook 'LaTeX-mode-hook
+          (lambda () (local-set-key (kbd "<f6>") #'preview-buffer)))
+(add-hook 'LaTeX-mode-hook
+          (lambda () (local-set-key (kbd "<f5>") #'preview-environment)))
+
+(add-hook 'LaTeX-mode-hook
+          (lambda () (local-set-key (kbd "<f7>") #'latex-preview-pane-mode)))
+(add-hook 'LaTeX-mode-hook
+          (lambda () (local-set-key (kbd "M-p") #'ace-window)))
+#+END_SRC
+** Biblography
+Adding a default biblography for ref-tex and enabling it all the time
+in auctex
+#+BEGIN_SRC emacs-lisp
+(add-hook 'LaTeX-mode-hook 'turn-on-reftex)
+(setq reftex-plug-into-AUCTeX t)
+(setq reftex-default-bibliography '("~/Dropbox/Research/Bibtex/library.bib")) 
+#+END_SRC
+* Programming mode
+** Highlighting uncomiited Changes
+#+BEGIN_SRC emacs-lisp
+(require 'diff-hl)
+(add-hook 'prog-mode-hook 'turn-on-diff-hl-mode)
+(add-hook 'vc-dir-mode-hook 'turn-on-diff-hl-mode)
+#+END_SRC
+
+** Terminal 
+   I like to use multi term for terminal and it is binded with the key C-c s
+#+BEGIN_SRC emacs-lisp
+(global-set-key (kbd "C-c s") 'multi-term)
+#+END_SRC
+** dired
+  #+BEGIN 
+  (require 'dired+)
+  (require 'dired-open)
+  #+END
+
+Open media files accordingly
+#+BEGIN_SRC emacs-lisp
+(setq dired-open-extensions
+      '(("pdf" . "evince")
+        ("mkv" . "vlc")
+        ("mp4" . "vlc")
+        ("avi" . "vlc")
+        ("mp3" . "vlc")))
+#+END_SRC
+Using a good view for dired directory
+- =l= for listing
+- =h= for human readable size
+- =A= for not including "." and ".."
+#+BEGIN_SRC emacs-lisp
+(setq-default dired-listing-switches "-lhA")
+#+END_SRC
+Kill buffers of deleted files
+#+BEGIN_SRC emacs-lisp
+(setq dired-clean-up-buffers-too t)
+#+END_SRC
+copying directories recursively, without asking
+deleting directories with permission
+#+BEGIN_SRC emacs-lisp
+(setq dired-recursive-copies 'always)
+(setq dired-recursive-deletes 'top)
+#+END_SRC
+
+** Tramp-term
+#+BEGIN_SRC emacs-lisp
+(require 'tramp-term)
+#+END_SRC
+** FreeFem++
+#+BEGIN_SRC emacs-lisp
+(autoload 'freefem++-mode "freefem++-mode"
+		"Major mode for editing FreeFem++ code." t)
+	(add-to-list 'auto-mode-alist '("\\.edp$" . freefem++-mode))
+	(add-to-list 'auto-mode-alist '("\\.idp$" . freefem++-mode))
+(setq freefempp-program "FreeFem++-nw")
+#+END_SRC
+** Matlab-mode
+#+BEGIN_SRC emacs-lisp
+(defun matlab-shell-here ()
+  "opens up a new matlab shell in the directory associated with the current buffer's file."
+  (interactive)
+  (split-window-right)
+  (other-window 1)
+  (matlab-shell))
+
+(defhydra hydra-matlab (:color blue
+                               :hint nil)
+  "
+ _c_: cell   _r_: region    _s_: start    _m_: interrupt
+ _l_: line   _C_: command   _S_: switch   _q_: quit
+"
+  ("c" matlab-shell-run-cell)
+  ("l" matlab-shell-run-region-or-line)
+  ("r" matlab-shell-run-region)
+  ("C" matlab-shell-run-command)
+  ("s" matlab-shell-here)
+  ("S" matlab-show-matlab-shell-buffer)
+  ("m" term-interrupt-subjob)
+  ("q" nil :color blue))
+(global-set-key (kbd "C-c m ") 'hydra-matlab/body)
+#+END_SRC
+
+** Python and Jedi
+
+#+BEGIN_SRC emacs-lisp
+(require 'conda)
+(conda-env-autoactivate-mode t)
+(custom-set-variables
+ '(conda-anaconda-home "/home/mathiew/anaconda3"))
+
+
+(eval-after-load "company-jedi"
+    '(setq jedi:server-command (list "~/anaconda3/envs/emacs-jedi/bin/python" jedi:server-script)))
+(require 'company-jedi)
+(add-hook 'conda-postactivate-hook 'jedi:stop-server)
+(add-hook 'conda-postdeactivate-hook 'jedi:stop-server)
+
+(defun my/python-mode-hook ()
+  (add-to-list 'company-backends 'company-jedi))
+
+(add-hook 'python-mode-hook 'my/python-mode-hook)
+
+(add-hook 'python-mode-hook 'jedi:setup)
+(setq jedi:complete-on-dot t)
+
+(add-hook 'after-init-hook #'global-flycheck-mode)
+(setq-default flycheck-emacs-lisp-load-path 'inherit)
+(setq flycheck-flake8-maximum-line-length 99)
+(setq flycheck-python-pylint-executable "~/anaconda3/bin/pylint")
+(setq flycheck-python-flake8-executable "~/anaconda3/bin/flake8")
+
+#+END_SRC
+
+
+
+ 
+* Buffers 
+** recent files
+#+BEGIN_SRC emacs-lisp
+;; save recent files
+(require 'recentf)
+(recentf-mode t)
+(setq recentf-save-file (concat user-emacs-directory "recentf")
+      recentf-max-saved-items 200
+      recentf-max-menu-items 15)
+(global-set-key (kbd "C-x C-g") 'recentf-open-files)
+#+END_SRC
+
+** Swiper mode
+#+BEGIN_SRC emacs-lisp
+(ivy-mode 1)
+(setq ivy-use-virtual-buffers t)
+(setq enable-recursive-minibuffers t)
+(global-set-key "\C-s" 'swiper)
+(global-set-key (kbd "C-c C-r") 'ivy-resume)
+(global-set-key (kbd "<f6>") 'ivy-resume)
+(global-set-key (kbd "M-x") 'counsel-M-x)
+(global-set-key (kbd "C-x C-f") 'counsel-find-file)
+(global-set-key (kbd "<f1> f") 'counsel-describe-function)
+(global-set-key (kbd "<f1> v") 'counsel-describe-variable)
+(global-set-key (kbd "<f1> l") 'counsel-fi1nd-library)
+(global-set-key (kbd "<f2> i") 'counsel-info-lookup-symbol)
+(global-set-key (kbd "<f2> u") 'counsel-unicode-char)
+(global-set-key (kbd "C-c g") 'counsel-git)
+(global-set-key (kbd "C-c j") 'counsel-git-grep)
+(global-set-key (kbd "C-c k") 'counsel-ag)
+(global-set-key (kbd "C-x l") 'counsel-locate)
+;; (global-set-key (kbd "C-S-o") 'counsel-rhythmbox)
+(define-key read-expression-map (kbd "C-r") 'counsel-expression-history)
+(setq ivy-use-virtual-buffers t)
+#+END_SRC
+
+** backups
+Writing backups somewhere else
+#+BEGIN_SRC emacs-lisp
+;; store all autosave files in the tmp dir
+(setq auto-save-file-name-transforms
+      `((".*" ,temporary-file-directory t)))
+;; backups in backup dir
+(setq backup-by-copying t
+      backup-directory-alist '(("." . "~/.emacs.d/backup"))
+      delete-old-versions t
+      kept-new-versions 24
+      kept-old-versions 12
+      version-control t)
+(setq create-lockfiles nil)
+#+END_SRC
+** unique buffer names
+Generating unique buffer names
+#+BEGIN_SRC emacs-lisp
+(require 'uniquify)
+(setq uniquify-buffer-name-style 'forward)
+(setq uniquify-separator "/")
+(setq uniquify-after-kill-buffer-p t)    ; rename after killing uniquified
+(setq uniquify-ignore-buffers-re "^\\*") ; don't muck with special buffers
+#+END_SRC
+** Mode line defaults
+#+BEGIN_SRC emacs-lisp
+(line-number-mode t)
+(column-number-mode t)
+(size-indication-mode nil)
+#+END_SRC
+** ace-jump
+Adding ace-jump mode and bind it to =M-p=
+#+BEGIN_SRC emacs-lisp
+(global-set-key (kbd "M-p") 'ace-window)
+#+END_SRC
+** scrolling next window 
+Scrolling up and down the other window
+#+BEGIN_SRC emacs-lisp
+(global-set-key (kbd "C-V") 'scroll-other-window-down)
+(global-set-key (kbd "M-V") 'scroll-other-window-up)
+#+END_SRC
+** Resizing the windows
+#+BEGIN_SRC emacs-lisp
+    (global-set-key (kbd "C-<") 'shrink-window-horizontally)
+    (global-set-key (kbd "C->") 'enlarge-window-horizontally)
+    (global-set-key (kbd "C-{") 'shrink-window)
+    (global-set-key (kbd "C-}") 'enlarge-window)
+#+END_SRC
+** Expand Region - Smart
+#+BEGIN_SRC emacs-lisp
+ (require 'expand-region)
+(global-set-key (kbd "C-=") 'er/expand-region)
+#+END_SRC
+
+** Open files
+I want to open the corresponding foler hitting f4 key
+#+BEGIN_SRC emacs-lisp
+(defun xah-open-in-desktop ()
+  "Show current file in desktop (OS's file manager).
+URL `http://ergoemacs.org/emacs/emacs_dired_open_file_in_ext_apps.html'
+Version 2015-11-30"
+  (interactive)
+  (cond
+   ((string-equal system-type "windows-nt")
+    (w32-shell-execute "explore" (replace-regexp-in-string "/" "\\" default-directory t t)))
+   ((string-equal system-type "darwin") (shell-command "open ."))
+   ((string-equal system-type "gnu/linux")
+    (let (
+          (process-connection-type nil)
+          (openFileProgram (if (file-exists-p "/usr/bin/xdg-open")
+                               "/usr/bin/gvfs-open"
+                             "/usr/bin/gvfs-open")))
+      (start-process "" nil openFileProgram "."))
+    ;; (shell-command "xdg-open .") ;; 2013-02-10 this sometimes froze emacs till the folder is closed. For example: with nautilus
+    )))
+(global-set-key (kbd "<f4>") 'xah-open-in-desktop) 
+
+#+END_SRC
+* Flycheck & flyspell
+
+#+BEGIN_SRC emacs-lisp
+(setq global-flycheck-mode t)
+(global-set-key (kbd "<f8>") 'flyspell-buffer)
+;;(global-set-key (kbd "<f8>") 'hydra-flycheck/body)
+#+END_SRC
+
+** Artbollocks mode
+#+BEGIN_SRC emacs-lisp
+(require 'artbollocks-mode)
+(setq artbollocks-weasel-words-regex
+          (concat "\\b" (regexp-opt
+                         '("one of the"
+                           "should"
+                           "just"
+                           "sort of"
+                           "a lot"
+                           "probably"
+                           "maybe"
+                           "perhaps"
+                           "really"
+                           "pretty"
+                           "nice"
+                           "action"
+                           "utilize"
+                           "leverage") t) "\\b"))
+(setq artbollocks-jargon nil)
+#+END_SRC
+* Org-mode
+** Org-ref
+#+BEGIN_SRC emacs-lisp
+(require 'org-ref)
+(require 'helm-bibtex)
+(require 'org-edit-latex)
+(setq org-ref-open-pdf-function 'org-ref-get-mendeley-filename)
+;; (define-key helm-map (kbd "C-z") 'helm-select-action)
+
+ (defhydra hydra-org-ref (:color blue :hint nil)
+   "
+   Cite^     ^Insert Bibtex^         ^view^                (?)
+---------------------------------------------------------------
+  _c_ite      _b_ibtex crossref     _g_oogle scholar
+  _r_ef       _d_oi insert          _u_rl 
+  _l_abel     _q_uit                _e_xtract
+      "
+   ("c" org-ref-helm-insert-cite-link)
+   ("r" org-ref-helm-insert-ref-link)
+   ("l" org-ref-helm-insert-label-link)
+   ("b" crossref-add-bibtex-entry)
+   ("d" doi-insert-bibtex)
+   ("g" org-ref-google-scholar-at-point)
+   ("u" org-ref-open-url-at-point)
+   ("e" org-ref-extract-bibtex-entries)
+   ("?" org-ref-help)
+   ("q" keyboard-quit))
+
+ (global-set-key (kbd "C-c ( ") 'hydra-org-ref/body)
+
+#+END_SRC
+*** Invoking biblatex in the process
+#+BEGIN_SRC emacs-lisp
+(setq  org-latex-pdf-process
+       '("latexmk -shell-escape -bibtex -pdf %f"))
+#+END_SRC
+** Habits
+#+BEGIN_SRC emacs-lisp
+(require 'org-habit)
+#+END_SRC
+** Todo keywords
+#+BEGIN_SRC emacs-lisp
+(setq org-todo-keywords
+      (quote ((sequence "TODO(t)" "NEXT(n)" "IN-PROGRESS(i)" "SOMEDAY(s)" "|" "DONE(d)")
+              (sequence "WAITING(w@/!)" "HOLD(h@/!)" "|" "CANCELLED(c@/!)" "PHONE" "MEETING"))))
+#+END_SRC
+
+
+
+   - and changing colors for them
+#+BEGIN_SRC emacs-lisp
+(setq org-todo-keyword-faces
+      (quote (("TODO" :foreground "red" :weight bold)
+              ("NEXT" :foreground "blue" :weight bold)
+              ("IN-PROGRESS" :foreground "blue" :weight bold)
+              ("DONE" :foreground "forest green" :weight bold)
+              ("WAITING" :foreground "orange" :weight bold)
+              ("HOLD" :foreground "magenta" :weight bold)
+              ("CANCELLED" :foreground "forest green" :weight bold)
+              ("MEETING" :foreground "forest green" :weight bold)
+              ("SOMEDAY" :foreground "green" :weight bold)
+              ("PHONE" :foreground "forest green" :weight bold))))
+
+#+END_SRC
+
+** images
+This will show the inline image using =C-c C-x C-v=
+#+BEGIN_SRC emacs-lisp
+(setq org-startup-with-inline-images t)
+(defun do-org-show-all-inline-images ()
+  (interactive)
+  (org-display-inline-images t t))
+(global-set-key (kbd "C-c C-x C-v")
+                'do-org-show-all-inline-images)
+#+END_SRC 
+** org-bullets
+#+BEGIN_SRC emacs-lisp
+(require 'org-bullets)
+(add-hook 'org-mode-hook (lambda () (org-bullets-mode 1)))
+#+END_SRC
+   
+** Syntax highlighting
+#+BEGIN_SRC emacs-lisp
+(setq org-src-fontify-natively t)
+#+END_SRC
+
+** org-agenda-files
+#+BEGIN_SRC emacs-lisp
+  (setq org-agenda-files (list "~/Dropbox/org/home.org"
+                               "~/Dropbox/org/scholar.org"))
+#+END_SRC
+** org-directory
+#+BEGIN_SRC emacs-lisp
+(setq org-directory "~/Dropbox/org")
+(setq org-default-notes-file "~/Dropbox/org/inbox.org")
+#+END_SRC
+** Setting up orgmobile
+#+BEGIN_SRC emacs-lisp
+;; Set to the name of the file where new notes will be stored
+(setq org-mobile-inbox-for-pull "~/Dropbox/org/inbox.org")
+;; Set to <your Dropbox root directory>/MobileOrg.
+(setq org-mobile-directory "~/Dropbox/Apps/MobileOrg")
+#+END_SRC
+** Timestamping
+#+BEGIN_SRC emacs-lisp
+(setq org-log-done 'time)
+;; (setq org-log-done 'note)
+#+END_SRC
+** Global Keybindings ...
+#+BEGIN_SRC emacs-lisp
+     (global-set-key "\C-cl" 'org-store-link)
+     (global-set-key "\C-ca" 'org-agenda)
+     (global-set-key "\C-cc" 'org-capture)
+     (global-set-key "\C-cb" 'org-iswitchb)
+#+END_SRC
+** Capture templates
+#+BEGIN_SRC emacs-lisp
+(setq org-capture-templates
+      (quote (("t" "todo" entry (file "~/Dropbox/org/inbox.org")
+               "* TODO %?\n%U\n%a\n" )
+              ("n" "note" entry (file "~/Dropbox/org/notes.org")
+               "* %? :NOTE:\n%U\n%a\n")
+              ("d" "Diary" entry (file+datetree "~/Dropbox/org/diary.org")
+               "* %?\n%U\n" )
+              ("m" "Meeting" entry (file "~/Dropbox/org/inbox.org")
+               "* MEETING with %? :MEETING:\n%U")
+              ("p" "Phone call" entry (file "~/Dropbox/org/inbox.org")
+               "* PHONE %? :PHONE:TASK:\n%U"))))
+;; I don't understand this one
+;;               ("r" "respond" entry (file "~/Dropbox/org/inbox.org")
+;;               "* NEXT Respond to %? subject %? \n SCHEDULED: %t\n%U\n%a\n" )
+
+#+END_SRC
+
+** Refiling 
+Configuration for refiling
+#+BEGIN_SRC emacs-lisp
+; Targets include this file and any file contributing to the agenda - up to 9 levels deep
+(setq org-refile-targets (quote ((nil :maxlevel . 9)
+                                 (org-agenda-files :maxlevel . 9))))
+
+; Use full outline paths for refile targets 
+(setq org-refile-use-outline-path t)
+
+; Targets complete directly
+(setq org-outline-path-complete-in-steps nil)
+
+; Allow refile to create parent tasks with confirmation
+(setq org-refile-allow-creating-parent-nodes (quote confirm))
+;;;; Refile settings
+; Exclude DONE state tasks from refile targets
+(defun az/verify-refile-target ()
+  "Exclude todo keywords with a done state from refile targets"
+  (not (member (nth 2 (org-heading-components)) org-done-keywords)))
+
+(setq org-refile-target-verify-function 'az/verify-refile-target)
+#+END_SRC
+** Key-bindings
+#+BEGIN_SRC emacs-lisp
+(global-set-key (kbd "<f12>") 'org-agenda)
+(global-set-key (kbd "<f9> b") 'bbdb)
+(global-set-key (kbd "<f9> c") 'calendar) 
+(global-set-key (kbd "<f9> w") 'forecast);; weather forecast
+(global-set-key (kbd "<f9> e") 'elfeed);; elfeed browser
+(global-set-key (kbd "C-c c") 'org-capture)
+#+END_SRC
+Key bindings for openning my org files quickly
+#+BEGIN_SRC emacs-lisp
+(global-set-key (kbd "\e o i")
+		(lambda () (interactive) (find-file "~/Dropbox/org/inbox.org")))
+(global-set-key (kbd "\e o s")
+		(lambda () (interactive) (find-file "~/Dropbox/org/scholar.org")))
+(global-set-key (kbd "\e o h")
+		(lambda () (interactive) (find-file "~/Dropbox/org/home.org")))
+(global-set-key (kbd "\e o j")
+		(lambda () (interactive) (find-file "~/Dropbox/org/journal.org")))
+#+END_SRC
+
+#+RESULTS:
+| lambda | nil | (interactive) | (find-file ~/Dropbox/org/home.org) |
+
+** Fast-Todo 
+it allows us to change the TODO state through the tags interface
+#+BEGIN_SRC emacs-lisp
+(setq org-use-fast-todo-selection t)
+#+END_SRC
+allows changing todo states with S-left and S-right skipipng all of the normal processing when entering or leaving a todo state
+#+BEGIN_SRC emacs-lisp
+(setq org-treat-S-cursor-todo-selection-as-state-change nil)
+#+END_SRC
+** State Triggers - [[http://doc.norang.ca/org-mode.html][source line]]
+Having triggers for change of status
+#+BEGIN_SRC emacs-lisp
+(setq org-todo-state-tags-triggers
+      (quote (("CANCELLED" ("CANCELLED" . t))
+              ("WAITING" ("WAITING" . t))
+              ("HOLD" ("WAITING") ("HOLD" . t))
+              (done ("WAITING") ("HOLD"))
+              ("TODO" ("WAITING") ("CANCELLED") ("HOLD"))
+              ("NEXT" ("WAITING") ("CANCELLED") ("HOLD"))
+              ("IN-PROGRESS" ("WAITING") ("CANCELLED") ("HOLD"))
+              ("DONE" ("WAITING") ("CANCELLED") ("HOLD")))))
+#+END_SRC
+** Indentation
+I love having correct indentation!
+#+BEGIN_SRC emacs-lisp
+  (setq org-indent-mode 1)
+  (setq  org-startup-indented 1)
+#+END_SRC
+
+** Agenda View
+this is for customized org-agenda
+#+BEGIN_SRC emacs-lisp
+  (setq org-agenda-custom-commands
+        '(("f" "Full List"
+            (
+               (agenda "" ((org-agenda-ndays 1))) 
+               (todo "IN-PROGRESS")
+               (todo "NEXT")
+               (todo "TODO")
+               (tags-todo "TASK")
+               (tags-todo "PAPER")
+               (tags-todo "SEMINAR")
+               (tags-todo "HABIT")
+               (tags-todo "PROJECTS")
+               (tags-todo "READ")))
+          ("t" "IN-PROGRESS, NEXT & TODO" ((todo "IN-PROGRESS") (todo "NEXT") (todo "TODO")))
+          ("j" "JOURNAL PAPERS" tags-todo "PAPER")
+          ("s" "SEMINAR" tags-todo "SEMINAR")
+          ("c" "CALL" todo "PHONE")
+          ("r" "READ" tags-todo "READ")
+          )
+   )
+#+END_SRC
+
+** Diary 
+Setting up the diary
+#+BEGIN_SRC emacs-lisp
+(setq diary-file "/Dropbox/org/diary.org")
+(setq org-agenda-include-diary t)
+#+END_SRC
+** Org-babel
+#+BEGIN_SRC emacs-lisp
+(custom-set-variables
+ '(org-babel-load-languages (quote ((emacs-lisp . t) 
+                                    (python . t) 
+                                    (latex . t)
+                                    (octave . t)
+                                    (gnuplot . t))))
+ '(org-confirm-babel-evaluate nil))
+(add-hook 'org-babel-after-execute-hook 'org-display-inline-images)
+#+END_SRC
+
+** LaTeX
+Adding latex-image to see pictures of formula in orgmode
+#+BEGIN_SRC emacs-lisp
+(setq org-latex-create-formula-image-program 'imagemagick)
+;; For changing the width of the image
+(setq org-image-actual-width nil)
+#+END_SRC
+** Archiving
+#+BEGIN_SRC emacs-lisp
+
+#+END_SRC
+** Jekyll
+#+BEGIN_SRC emacs-lisp
+#+END_SRC
+
+** Hydra and Clocking
+#+BEGIN_SRC emacs-lisp
+ (defhydra hydra-org-clock (:color blue :hint nil)
+   "
+Clock   In/out^     ^Edit^   ^Summary     (_?_)
+-----------------------------------------
+        _i_n         _e_dit   _g_oto entry
+        _c_ontinue   _q_uit   _d_isplay
+        _o_ut        ^ ^      _r_eport
+      "
+   ("i" org-clock-in)
+   ("o" org-clock-out)
+   ("c" org-clock-in-last)
+   ("e" org-clock-modify-effort-estimate)
+   ("q" org-clock-cancel)
+   ("g" org-clock-goto)
+   ("d" org-clock-display)
+   ("r" org-clock-report)
+   ("?" (org-info "Clocking commands")))
+ (global-set-key (kbd "C-c w ") 'hydra-org-clock/body)
+#+END_SRC
+
+#+RESULTS:
+: hydra-org-clock/body
+
+** justifying Equations and numbering
+
+Usually we can toggle in orgmode to see the equations with C-c C-x C-l
+This is how to justify equations to the middle
+#+BEGIN_SRC emacs-lisp
+;; specify the justification you want
+(require 'ov)
+(plist-put org-format-latex-options :justify 'left)
+
+(defun org-justify-fragment-overlay (beg end image imagetype)
+  "Adjust the justification of a LaTeX fragment.
+The justification is set by :justify in
+`org-format-latex-options'. Only equations at the beginning of a
+line are justified."
+  (cond
+   ;; Centered justification
+   ((and (eq 'center (plist-get org-format-latex-options :justify)) 
+         (= beg (line-beginning-position)))
+    (let* ((img (create-image image 'imagemagick t))
+           (width (car (image-size img)))
+           (offset (floor (- (/ (window-text-width) 2) (/ width 2)))))
+      (overlay-put (ov-at) 'before-string (make-string offset ? ))))
+   ;; Right justification
+   ((and (eq 'right (plist-get org-format-latex-options :justify)) 
+         (= beg (line-beginning-position)))
+    (let* ((img (create-image image 'imagemagick t))
+           (width (car (image-display-size (overlay-get (ov-at) 'display))))
+           (offset (floor (- (window-text-width) width (- (line-end-position) end)))))
+      (overlay-put (ov-at) 'before-string (make-string offset ? ))))))
+
+(defun org-latex-fragment-tooltip (beg end image imagetype)
+  "Add the fragment tooltip to the overlay and set click function to toggle it."
+  (overlay-put (ov-at) 'help-echo
+               (concat (buffer-substring beg end)
+                       "mouse-1 to toggle."))
+  (overlay-put (ov-at) 'local-map (let ((map (make-sparse-keymap)))
+                                    (define-key map [mouse-1]
+                                      `(lambda ()
+                                         (interactive)
+                                         (org-remove-latex-fragment-image-overlays ,beg ,end)))
+                                    map)))
+
+;; advise the function to a
+(advice-add 'org--format-latex-make-overlay :after 'org-justify-fragment-overlay)
+(advice-add 'org--format-latex-make-overlay :after 'org-latex-fragment-tooltip)
+;; That is it. If you get tired of the advice, remove it like this:
+
+;;(advice-remove 'org--format-latex-make-overlay 'org-justify-fragment-overlay)
+;;(advice-remove 'org--format-latex-make-overlay 'org-latex-fragment-tooltip)
+
+
+
+(defun org-renumber-environment (orig-func &rest args)
+  "A function to inject numbers in LaTeX fragment previews."
+  (let ((results '()) 
+	(counter -1)
+	(numberp))
+
+    (setq results (loop for (begin .  env) in 
+			(org-element-map (org-element-parse-buffer) 'latex-environment
+			  (lambda (env)
+			    (cons
+			     (org-element-property :begin env)
+			     (org-element-property :value env))))
+			collect
+			(cond
+			 ((and (string-match "\\\\begin{equation}" env)
+			       (not (string-match "\\\\tag{" env)))
+			  (incf counter)
+			  (cons begin counter))
+			 ((string-match "\\\\begin{align}" env)
+			  (prog2
+			      (incf counter)
+			      (cons begin counter)			    
+			    (with-temp-buffer
+			      (insert env)
+			      (goto-char (point-min))
+			      ;; \\ is used for a new line. Each one leads to a number
+			      (incf counter (count-matches "\\\\$"))
+			      ;; unless there are nonumbers.
+			      (goto-char (point-min))
+			      (decf counter (count-matches "\\nonumber")))))
+			 (t
+			  (cons begin nil)))))
+
+    (when (setq numberp (cdr (assoc (point) results)))
+      (setf (car args)
+	    (concat
+	     (format "\\setcounter{equation}{%s}\n" numberp)
+	     (car args)))))
+  
+  (apply orig-func args))
+
+(advice-add 'org-create-formula-image :around #'org-renumber-environment)
+
+;; changing the size of the formula to 1.5
+(setq org-format-latex-options (plist-put org-format-latex-options :scale 1.50))
+
+#+END_SRC
+
+Automatic Toggle
+#+BEGIN_SRC emacs-lisp
+(defvar az/org-latex-fragment-last nil
+    "Holds last fragment/environment you were on.")
+
+  (defun az/org-in-latex-fragment-p ()
+    "Return the point where the latex fragment begins, if inside
+  a latex fragment. Else return false"
+    (let* ((el (org-element-context))
+           (el-type (car el)))
+      (and (or (eq 'latex-fragment el-type) (eq 'latex-environment el-type))
+          (org-element-property :begin el))))
+
+  (defun az/org-latex-fragment-toggle ()
+    "Toggle a latex fragment image "
+    (and (eq 'org-mode major-mode)
+	 (let ((begin (az/org-in-latex-fragment-p)))
+           (cond
+            ;; were on a fragment and now on a new fragment
+            ((and
+              ;; fragment we were on
+              az/org-latex-fragment-last
+              ;; and are on a fragment now
+              begin
+
+              ;; but not on the last one this is a little tricky. as you edit the
+              ;; fragment, it is not equal to the last one. We use the begin
+              ;; property which is less likely to change for the comparison.
+              (not (and az/org-latex-fragment-last
+			(= begin
+			   az/org-latex-fragment-last))))
+             ;; go back to last one and put image back, provided there is still a fragment there
+             (save-excursion
+               (goto-char az/org-latex-fragment-last)
+               (when (az/org-in-latex-fragment-p) (org-preview-latex-fragment))
+
+               ;; now remove current image
+               (goto-char begin)
+               (let ((ov (loop for ov in (org--list-latex-overlays)
+                               if
+                               (and
+				(<= (overlay-start ov) (point))
+				(>= (overlay-end ov) (point)))
+                               return ov)))
+		 (when ov
+                   (delete-overlay ov)))
+               ;; and save new fragment
+               (setq az/org-latex-fragment-last begin)))
+
+            ;; were on a fragment and now are not on a fragment
+            ((and
+              ;; not on a fragment now
+              (not begin)
+              ;; but we were on one
+              az/org-latex-fragment-last)
+             ;; put image back on, provided that there is still a fragment here.
+             (save-excursion
+               (goto-char az/org-latex-fragment-last)
+               (when (az/org-in-latex-fragment-p) (org-preview-latex-fragment)))
+
+             ;; unset last fragment
+             (setq az/org-latex-fragment-last nil))
+
+            ;; were not on a fragment, and now are
+            ((and
+              ;; we were not one one
+              (not az/org-latex-fragment-last)
+              ;; but now we are
+              begin)
+             ;; remove image
+             (save-excursion
+               (goto-char begin)
+               (let ((ov (loop for ov in (org--list-latex-overlays)
+                               if
+                               (and
+				(<= (overlay-start ov) (point))
+				(>= (overlay-end ov) (point)))
+                               return ov)))
+		 (when ov
+                   (delete-overlay ov))))
+             (setq az/org-latex-fragment-last begin))))))
+#+END_SRC
+
+Require ox-manuscript
+#+BEGIN_SRC emacs-lisp
+(require 'ox-manuscript)
+#+END_SRC
+
+* Yasnipet
+** Configuring Yasnippet
+I store my snippets in here
+#+BEGIN_SRC emacs-lisp
+(setq yas-snippet-dirs '("~/.emacs.d/snippets"))
+(yas-global-mode 1)
+#+END_SRC
+Note letting to indent automatically
+#+BEGIN_SRC emacs-lisp
+(setq yas/indent-line nil)
+#+END_SRC
+
+** Conflict org & Yasnippet
+Changing keys for conflict between yasnippet and orgmode
+first we define this function
+#+BEGIN_SRC emacs-lisp
+          (defun yas/org-very-safe-expand ()
+            (let ((yas/fallback-behavior 'return-nil)) (yas/expand)))
+#+END_SRC
+and then telling org-mode to use this function
+#+BEGIN_SRC emacs-lisp
+          (add-hook 'org-mode-hook
+                    (lambda ()
+                      (make-variable-buffer-local 'yas/trigger-key)
+                      (setq yas/trigger-key [tab])
+                      (add-to-list 'org-tab-first-hook 'yas/org-very-safe-expand)
+                      (define-key yas/keymap [tab] 'yas/next-field)))
+
+#+END_SRC
+
+* Fun! (weather forecast, google maps!)
+** Adding weather forecast
+#+BEGIN_SRC emacs-lisp
+(require 'forecast)
+ (setq forecast-api-key "f4482c0687a9ce39f7a22f34a83056f6")
+#+END_SRC   
+
+** Google-maps - It's so cool- [[https://julien.danjou.info/projects/emacs-packages#google-maps][check here ]]
+#+BEGIN_SRC emacs-lisp
+(require 'google-maps)
+#+END_SRC
+** Google-this
+#+BEGIN_SRC emacs-lisp
+(global-set-key (kbd "C-x g") 'google-this-mode-submap)
+#+END_SRC
+
+* elfeed
+** Setting the orgfile for data base
+#+BEGIN_SRC emacs-lisp
+(progn
+    (elfeed-org)
+    (setq rmh-elfeed-org-files (list "~/Dropbox/org/elfeed.org")))
+;;(setq rmh-elfeed-org-files (list "~/Dropbox/org/elfeed.org"))
+#+END_SRC
+
+#+RESULTS:
+
+
+** Testing a new hydra for elfeed
+#+BEGIN_SRC emacs-lisp
+ (defhydra hydra-elfeed-filter (:color blue :hint nil)
+   "
+Filter   Category^     ^ ^      ^Summary     (_q_uit)
+-----------------------------------------
+        _f_luids      _n_ews    _a_ll
+        _p_hysics     _*_star   _t_oday
+        _e_con blogs  _m_ark    _r_efresh
+      "
+   ("f" (elfeed-search-set-filter "@2-months-ago +fluids"))
+   ("p" (elfeed-search-set-filter "@2-months-ago +physics"))
+   ("e" (elfeed-search-set-filter "@2-months-ago +econs"))
+   ("n" (elfeed-search-set-filter "@2-months-ago +news"))
+   ("*" (elfeed-search-set-filter "@2-months-ago +star"))
+   ("m" elfeed-toggle-star )
+   ("a" (elfeed-search-set-filter "@2-months-ago"))
+   ("t" (elfeed-search-set-filter "@1-day-ago"))
+   ("r" elfeed-show-refresh)
+   ("q" elfeed-kill-buffer)
+)
+
+ (global-set-key (kbd "C-[ C-[") 'hydra-org-clock/body)
+#+END_SRC
+* Browser
+Default Browser
+#+BEGIN_SRC emacs-lisp
+(setq browse-url-browser-function 'browse-url-generic
+      browse-url-generic-program "google-chrome")
+#+END_SRC
+
+* Reveal.js
+* Explaining some modified key-modes I have
+- f12 -> org-agenda
+- f6 -> for preview-buffer in latex
+- f9 b -> bbdb mode
+- f9 c -> calendar
+- f9 w -> weather forecast
+- f9 e -> elfeed
+- f8 -> ispell-buffer
+- f4 -> open the corresponding foler outside
+- C-c c -> capture with emacs
+- C-c s -> for multi-term
+- C-x C-g -> choosing from recentf in ido-mode
+- C-c C-x C-v -> Show images in org-mode
+- C-< -> shrink the window horizontally
+- C-> expand the window horizontally
+- C-{ -> shrink window vertically
+- c-} -> expand window vertically
+- C-= -> expand region mode
+  pasting with C-c l
+- esc o i -> opens inbox.org
+- esc o s -> opens scholar.org
+- esc o h -> opens home.org
+- How to reschedule: mark the items using *m* -> hit *B* bulk action list ->  *s* to reschedule
+
+** Boorkmarks
+- C+x r m -> bookmark set
+- C+x r l -> list of bookmarks
+- C+x r b -> bookmarkjump
+
+  
